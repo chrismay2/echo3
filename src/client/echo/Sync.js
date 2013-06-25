@@ -393,10 +393,12 @@ Echo.Sync.BoxShadow = Core.extend({
          * @param {Element} the target DOM element
          */
         render: function(boxShadow, element) {
-            if (!(boxShadow instanceof Echo.Sync.BoxShadow)) {
-                throw new Error("Echo.Sync.BoxShadow.render: unsupported object.");
-            } 
-            element.style["boxShadow"] = boxShadow.toCssValue();
+            if (boxShadow instanceof Echo.Sync.BoxShadow) {
+                element.style.boxShadow = boxShadow.toCssValue();
+            } else {
+                //plain String, e.g. "0px 0px 5px 5px white"
+                element.style.boxShadow = boxShadow;
+            }
         },
         
         /**
