@@ -1915,16 +1915,16 @@ Echo.Sync.RoundedCorner = {
 
         var ci = Echo.Sync.Insets.toPixels(radius);
         if (ci.left > 0) {
-            element.style["border-top-left-radius"] = ci.left + "px";
+            element.style.borderTopLeftRadius = ci.left + "px";
         }
         if (ci.top > 0) {
-            element.style["border-top-right-radius"] = ci.top + "px";
+            element.style.borderTopRightRadius = ci.top + "px";
         }
         if (ci.right > 0) {
-            element.style["border-bottom-right-radius"] = ci.right + "px";
+            element.style.borderBottomRightRadius = ci.right + "px";
         }
         if (ci.bottom > 0) {
-            element.style["border-bottom-left-radius"] = ci.bottom + "px";
+            element.style.borderBottomLeftRadius = ci.bottom + "px";
         }
     }
 };
