@@ -33,12 +33,13 @@ import java.util.Locale;
 
 import nextapp.echo.app.Alignment;
 import nextapp.echo.app.Color;
+import nextapp.echo.app.Column;
 import nextapp.echo.app.Component;
 import nextapp.echo.app.Extent;
 import nextapp.echo.app.Font;
+import nextapp.echo.app.Font.Typeface;
 import nextapp.echo.app.Insets;
 import nextapp.echo.app.Label;
-import nextapp.echo.app.Column;
 import nextapp.echo.app.LayoutDirection;
 import nextapp.echo.app.SplitPane;
 import nextapp.echo.app.event.ActionEvent;
@@ -145,9 +146,19 @@ public class LabelTest extends SplitPane {
                 });
             }
         });
-        controlsColumn.addButton("Set Font", new ActionListener() {
+        controlsColumn.addButton("Set Random Font", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 final Font font = StyleUtil.randomFont();
+                apply(new Applicator() {
+                    public void apply(Label label) {
+                        label.setFont(font);
+                    }
+                });
+            }
+        });
+        controlsColumn.addButton("Set Custom Font", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                final Font font = new Font(new Typeface("AlexBrush"), Font.PLAIN, new Extent(36));;
                 apply(new Applicator() {
                     public void apply(Label label) {
                         label.setFont(font);
