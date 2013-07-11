@@ -29,6 +29,7 @@ TestApp = Core.extend(Echo.Application, {
         testScreen.addTest("WindowPane");
         testScreen.addTest("ButtonAlignment");
         testScreen.addTest("List");
+        testScreen.addTest("Table");
         this.rootComponent.add(testScreen);
     }
 });
@@ -629,4 +630,22 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
         attributes.background = "#aaffaa";
         this.add(new Echo.SelectField(attributes));        
     }
+});
+
+TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
+
+    $construct: function() {
+        TestApp.TestPane.call(this);
+
+        this.add(this.table = new Echo.RemoteTable({
+            styleName: "Default",
+        }));
+
+        this.addTestButton("Set Title", Core.method(this, this._setTitle));
+    },
+
+    _setTitle: function() {
+        this.windowPane.set("title", "Hello, world");
+    },
+
 });
