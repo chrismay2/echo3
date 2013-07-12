@@ -84,6 +84,8 @@ public class Table extends BorderedComponent {
     public static final String PROPERTY_SELECTION_FONT = "selectionFont";
     public static final String PROPERTY_SELECTION_FOREGROUND= "selectionForeground";
     public static final String PROPERTY_WIDTH = "width";
+    //background
+    //height
     
     public static final String INPUT_ACTION = "action";
 

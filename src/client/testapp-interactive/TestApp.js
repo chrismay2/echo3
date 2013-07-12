@@ -30,7 +30,14 @@ TestApp = Core.extend(Echo.Application, {
         testScreen.addTest("ButtonAlignment");
         testScreen.addTest("List");
         testScreen.addTest("Table");
+
         this.rootComponent.add(testScreen);
+        while (testScreen.testSelectSplitPane.children.length > 1) {
+            testScreen.testSelectSplitPane.remove(1);
+        }
+        var test = TestApp.Tests["Table"];
+        var instance = new test();
+        testScreen.testSelectSplitPane.add(instance);        
     }
 });
 
@@ -629,7 +636,8 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
         
         attributes.background = "#aaffaa";
         this.add(new Echo.SelectField(attributes));        
-    }
+    },
+    
 });
 
 TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
@@ -637,9 +645,36 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
     $construct: function() {
         TestApp.TestPane.call(this);
 
-        this.add(this.table = new Echo.RemoteTable({
-            styleName: "Default",
-        }));
+		var children = [];
+		for (var i = 0; i < 80; i++) {
+			 children[i] = new Echo.Label({text: "TEXT_" + i});
+			 i++;
+			 if (i < 2) {
+			 	 children[i] = new Echo.Label({text: "T_" + i});
+			 } else {
+				 children[i] = new Echo.Label({text: "TEXT_TEXT_" + i});
+			 }
+		}
+		 
+		var table = new Echo.Sync.RemoteTable({
+	        columnCount: 2,
+	        rowCount: 39,
+	        headerVisible: false,
+	        width: "300px",
+	        height: "80%",
+	        headerVisible: true,
+	        border: "1px solid #3333aa",
+	        insets: "3px",
+	        background: "#aaff33",
+	        backgroundHeader: "#33aaff",
+	        rolloverBackground: "#333333",
+	        margins: "5px",
+			selection: "2",
+	        selectionEnabled: true,
+	        rolloverEnabled: true,
+			children: children
+        });
+        this.content.add(table);
 
         this.addTestButton("Set Title", Core.method(this, this._setTitle));
     },

@@ -725,16 +725,6 @@ Core.Web.Env = {
     QUIRK_IE_SECURE_ITEMS: null,
 
     /**
-     * Flag indicating that IE browser does not properly render tables whose
-     * widths are set to percent values when scrollbars are present. The
-     * scrollbar is not included in the calculation of the container size, thus
-     * a 100% wide table will not fit in its container when a vertical scrollbar
-     * is present, and will trigger a horizontal scroll bar.
-     * @type Boolean
-     */
-    QUIRK_IE_TABLE_PERCENT_WIDTH_SCROLLBAR_ERROR: null,
-
-    /**
      * Quirk flag indicating that offset measurements on elements whose overflow setting is hidden
      * will be incorrectly reduced by the border size.  Used internally in measuring algorithms.
      * @type Boolean
@@ -905,7 +895,6 @@ Core.Web.Env = {
                 this.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING = true;
                 this.NOT_SUPPORTED_RELATIVE_COLUMN_WIDTHS = true;
                 this.QUIRK_CSS_BORDER_COLLAPSE_INSIDE = true;
-                this.QUIRK_IE_TABLE_PERCENT_WIDTH_SCROLLBAR_ERROR = true;
                 this.QUIRK_IE_SELECT_PERCENT_WIDTH = true;
                 
                 if (this.BROWSER_VERSION_MAJOR < 7) {
