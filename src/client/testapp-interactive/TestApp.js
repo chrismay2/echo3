@@ -714,11 +714,15 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.insets = "10px 5px";
 		    attr.horizontalLine = "1px solid #dddddd";
 		    attr.separatorLine = "3px solid #778899";
+		    attr.rolloverBackground = "#f0f0FD";
+		    attr.rolloverEnabled = true;
 		    attr.foreground = "gray";
 		    attr.headerForeground = "gray";
 	 	} else if (style === "box") {
 		    attr.background = "#E8EDFF";
 		    attr.headerBackground = "#B9C9FE";
+		    attr.rolloverBackground = "#D0DAFD";
+		    attr.rolloverEnabled = true;
 		    attr.foreground = "#555555";
 		    attr.insets = "10px 5px";
 		    attr.horizontalLine = "2px solid #ffffff";
