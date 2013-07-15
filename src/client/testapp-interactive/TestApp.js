@@ -614,7 +614,6 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
             insets: "10px 8px",
             radius: "16px"
         });
-        
     },
 
     _addSelectField: function(caption, attributes) {
@@ -636,51 +635,137 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
         
         attributes.background = "#aaffaa";
         this.add(new Echo.SelectField(attributes));        
-    },
-    
+    }
 });
 
 TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 
+	_chkBigData: null, 
+
     $construct: function() {
         TestApp.TestPane.call(this);
 
+		var that = this;
+		this._chkBigData = new Echo.CheckBox({text: "Big data", insets: "5px"});
+	    this.controlsColumn.add(this._chkBigData);
+		
+        this.addTestButton("Default", function() {
+        	that._showTable("default");
+    	});
+        this.addTestButton("Horizontal Minimalist", function() {
+        	that._showTable("horizontal_minimalist");
+    	});
+        this.addTestButton("Box", function() {
+        	that._showTable("box");
+    	});
+        this.addTestButton("Zebra", function() {
+        	that._showTable("zebra");
+    	});
+        this.addTestButton("One Column Emphasis", function() {
+        	that._showTable("one_column_emphasis");
+    	});	
+        this.addTestButton("Rounded Corner", function() {
+        	that._showTable("rounded_corner");
+    	});	
+        this.addTestButton("Verticals Bars", function() {
+        	that._showTable("verticals");
+    	});	
+     },
+
+	 _showTable: function(style) {
+
+        while (this.content.children.length > 0) {
+	        this.content.remove(0);
+	    }
+
+		var childrenTexts = [
+			"Employee", "Salary", "Bonus", "Supervisor",
+			"Stephen C. Cox", "$300", "$50", "Bob",
+			"Josephin Tan", "$150", "-", "Annie",
+			"Joyce Ming", "$200", "$35", "Andy",
+			"James A. Pentel", "$175", "$25", "Annie"];
+
 		var children = [];
-		for (var i = 0; i < 80; i++) {
-			 children[i] = new Echo.Label({text: "TEXT_" + i});
-			 i++;
-			 if (i < 2) {
-			 	 children[i] = new Echo.Label({text: "T_" + i});
-			 } else {
-				 children[i] = new Echo.Label({text: "TEXT_TEXT_" + i});
-			 }
+		for (var i = 0; i < childrenTexts.length; i++) {
+			children[i] = new Echo.Label({text: childrenTexts[i]});
 		}
-		 
-		var table = new Echo.Sync.RemoteTable({
-	        columnCount: 2,
-	        rowCount: 39,
-	        headerVisible: false,
-	        width: "300px",
-	        height: "80%",
-	        headerVisible: true,
-	        border: "1px solid #3333aa",
-	        insets: "3px",
-	        background: "#aaff33",
-	        backgroundHeader: "#33aaff",
-	        rolloverBackground: "#333333",
-	        margins: "5px",
-			selection: "2",
-	        selectionEnabled: true,
-	        rolloverEnabled: true,
+		
+		if (this._chkBigData.get("selected")) {
+			for (var j = 0; j < 200; j++) {
+				children[j +20] = new Echo.Label({text: "Data_" + j});
+			}
+		}
+		
+	 	var attr = {
+		    columnCount: 4,
+		    rowCount: children.length / 4 - 1,
+		    width: "400px",
+		    height: "80%",
+		    selection: "0",
+		    margins: "5px",		
+		    columnWeights: "40 15 15 30",    
 			children: children
-        });
-        this.content.add(table);
-
-        this.addTestButton("Set Title", Core.method(this, this._setTitle));
-    },
-
-    _setTitle: function() {
-        this.windowPane.set("title", "Hello, world");
-    },
-
+		}
+		this.content.set("background", "#ffffff");
+		
+	 	if (style === "default") {
+	 		//nothing!
+	 	} else if (style === "horizontal_minimalist") {
+		    attr.insets = "10px 5px";
+		    attr.horizontalLine = "1px solid #dddddd";
+		    attr.separatorLine = "3px solid #778899";
+		    attr.foreground = "gray";
+		    attr.headerForeground = "gray";
+	 	} else if (style === "box") {
+		    attr.background = "#E8EDFF";
+		    attr.headerBackground = "#B9C9FE";
+		    attr.foreground = "#555555";
+		    attr.insets = "10px 5px";
+		    attr.horizontalLine = "2px solid #ffffff";
+	 	} else if (style === "zebra") {
+		    attr.insets = "10px 5px";
+		    attr.zebraBackground = "#E8EDFF";
+	 	} else if (style === "one_column_emphasis") {
+		    attr.insets = "10px 5px";
+		    attr.foreground = "#555555";
+		    attr.headerForeground = "#555555";
+		    attr.rolloverBackground = "#EFF2FF";
+		    attr.rolloverEnabled = true;
+		    attr.horizontalLine = "1px solid #E8EDFF";
+	 	} else if (style === "rounded_corner") {
+		    attr.background = "#E8EDFF";
+		    attr.headerBackground = "#B9C9FE";
+		    attr.foreground = "#555555";
+		    attr.rolloverBackground = "#D0DAFD";
+		    attr.rolloverEnabled = true;
+		    attr.insets = "12px 8px";
+		    attr.horizontalLine = "2px solid #ffffff";
+		    attr.radius = "20px";
+	 	} else if (style === "verticals") {
+		    attr.insets = "10px 5px";
+		    attr.verticalLine = "3px solid #dddddd";
+		    attr.foreground = "gray";
+		    attr.headerForeground = "gray";
+	 	} else if (style === "xxxx") {
+	 	 	//"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+		    attr.boxShadow = "3px 3px 12px 2px black";
+		    attr.background = "#ffffff";
+		    attr.border = "3px solid #778899";
+		    attr.headerBackground = "#778899";
+		    attr.headerForeground = "#f6f6f6";  
+		    attr.horizontalLine = "2px dotted #778899";
+		    attr.insets = "3px";
+		    attr.radius = "20px";
+		    attr.rolloverBackground = "#333333";
+		    attr.rolloverEnabled = true;
+		    attr.selectionEnabled = true;
+		    attr.verticalLine = "2px dotted #778899";
+		    attr.zebraBackground = "#eeeeee";
+		}
+		
+		//   headerVisible: false,
+		
+	 	var table = new Echo.Sync.RemoteTable(attr);
+	    this.content.add(table);
+	 }
 });

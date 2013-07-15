@@ -10,7 +10,6 @@ Echo.MouseListener = Core.extend({
     _methodUpRef: null,                  
 
      init2: function() {
-     	console.log("XXXXXXXXXXXXX");
         var isIPad = navigator.userAgent.match(/iPad/i) != null;
         var isAndroid = navigator.userAgent.match(/Android/i) != null;
         var isTouch = isIPad || isAndroid;
