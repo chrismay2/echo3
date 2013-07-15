@@ -68,17 +68,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      */
     _useDefaultSelectionStyle: false,
     
-    /**
-     * Array of column width settings.
-     * @type Array
-     */
-    _columnWidths: null,
-	
 	_margins: 15,
 	
-	_colgroup: null,
+	_colGroupHeader: null,
 			
-	_colgroup_body: null,
+	_colGroupBody: null,
 			
 //	_resizeGhost: null,
 	
@@ -143,7 +137,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         var tr = document.createElement("tr");
     
         var tdPrototype = document.createElement(isHeader ? "th" : "td");
-        if (!isHeader && this._verticalLine) {
+        if (this._verticalLine) {
 	        tdPrototype.style.borderRight = this._verticalLine;
 	    }
         if (!isHeader && this._horizontalLine) {
@@ -155,7 +149,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
             tr.appendChild(td);
-            if (!isHeader && columnIndex == 0 && this._verticalLine) {
+            if (columnIndex == 0 && this._verticalLine) {
             	//draw the left-most border
             	td.style.borderLeft = this._verticalLine;
             }
@@ -166,9 +160,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             	resizeHandle.style.cursor = "col-resize";
             	resizeHandle.style.display = "inline";
             	resizeHandle.style.float = "right";
-            	resizeHandle.style.height = "20px";
-            	resizeHandle.style.margin = "-3px -5px -5px 0px";
-            	resizeHandle.style.width = "5px";
+            	resizeHandle.style.height = "24px";
+            	resizeHandle.style.margin = "-6px -10px -9px 0px";
+            	resizeHandle.style.width = "6px";
             	resizeHandle.style.zIndex = "10000";
             	td.appendChild(resizeHandle);
             }
@@ -339,8 +333,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 			this._tableHeader.style.borderCollapse = "collapse";
 	        this._divHeader.appendChild(this._tableHeader);
 	        
-	        this._colgroup = this._buildColGroup(this._columnCount, this._columnWeights);
-	        this._tableHeader.appendChild(this._colgroup);
+	        this._colGroupHeader = document.createElement("colgroup");
+	        for (var i = 0; i < this._columnCount; ++i) {
+	            this._colGroupHeader.appendChild(document.createElement("col"));
+	        }
+	        this._tableHeader.appendChild(this._colGroupHeader);
         
         	this._tbodyHeader = document.createElement("tbody");
 	        this._tableHeader.appendChild(this._tbodyHeader);
@@ -367,8 +364,8 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.renderComponentDefaults(this.component, this._table);
         this._divTable.appendChild(this._table);
 
-        this._colgroup_body = this._buildColGroup(this._columnCount, this._columnWeights);
-        this._table.appendChild(this._colgroup_body);
+        this._colGroupBody = this._buildColGroup();
+        this._table.appendChild(this._colGroupBody);
         
         var width = this.component.render("width");
         if (width) {
@@ -378,34 +375,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         this._tbody = document.createElement("tbody");
         this._table.appendChild(this._tbody);
-         
-         //XXX duplicate with _buildColGroup()
-        if (this.component.render("columnWidth")) {
-            this._columnWidths = [];
-            // If any column widths are set, render colgroup.
-            var columnPixelAdjustment = 0;
-            if (Core.Web.Env.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING) {
-                columnPixelAdjustment = this._defaultPixelInsets.left + this._defaultPixelInsets.right;
-            }
-            
-            var colGroupElement = document.createElement("colgroup");
-            for (var i = 0; i < this._columnCount; ++i) {
-                var colElement = document.createElement("col");
-                width = this.component.renderIndex("columnWidth", i); 
-                if (width != null) {
-                    if (Echo.Sync.Extent.isPercent(width)) {
-                        colElement.style.width = width.toString();
-                    } else {
-                        var columnPixels = Echo.Sync.Extent.toPixels(width, true);
-                        this._columnWidths[i] = columnPixels - columnPixelAdjustment;
-                        colElement.style.width = this._columnWidths[i] + "px";
-                    }
-                }
-                colGroupElement.appendChild(colElement);
-            }
-            this._table.appendChild(colGroupElement);
-        }
-        
         
         if (this._headerVisible) {
 	        var trHeaderPrototype = this._createRowPrototype(true);
@@ -435,6 +404,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._div.appendChild(this._resizeGhost);
         
         this._addEventListeners();
+        this.renderDisplay();
     },
 
 
@@ -444,11 +414,18 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     	this._divHeader.style.marginRight = scroll ? "17px" : "0px";
     	this._divHeader.style.height = this._tableHeader.clientHeight + "px";
     	this._divTable.style.top = this._tableHeader.clientHeight + "px";
+    	
+    	//sync header column widths with main table widths
+    	if (this._table.rows.length > 0) {
+	    	var t1Row = this._table.rows[0];
+	    	for (var i = 0; i < t1Row.cells.length; i++) {
+		    	this._colGroupHeader.children[i].style.width = t1Row.cells[i].offsetWidth + "px"; 
+    		}
+    	}
     },
 
     /** @see Echo.Render.ComponentSync#renderDispose */
     renderDispose: function(update) {
-        this._columnWidths = null;
         if (this._rolloverEnabled || this._selectionEnabled) {
             var tr = this._tbody.firstChild;
             if (this._headerVisible) {
@@ -463,11 +440,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
        	this._divHeader = null;
        	this._divHeader2 = null;
        	this._tableHeader = null;
-        this._colgroup = null;
+        this._colGroupHeader = null;
        	this._tbodyHeader = null;
         this._divTable = null;
         this._table = null;
-        this._colgroup_body = null;
+        this._colGroupBody = null;
         this._tbody = null;
         this._resizeGhost = null;
     },
@@ -544,13 +521,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             var child = this.component.getComponent((rowIndex + (this._headerVisible ? 1 : 0)) * this._columnCount + columnIndex);
             var layoutData = child.render("layoutData");            
             if (layoutData) {
-                if (Core.Web.Env.QUIRK_TABLE_CELL_WIDTH_EXCLUDES_PADDING && this._columnWidths && 
-                        this._columnWidths[columnIndex]) { 
-                    var cellInsets = Echo.Sync.Insets.toPixels(layoutData.insets);
-                    if (this._defaultPixelInsets.left + this._defaultPixelInsets.right < cellInsets.left + cellInsets.right) {
-                        td.style.width = (this._columnWidths[columnIndex] - cellInsets.left - cellInsets.right) + "px";
-                    }
-                }
                 Echo.Sync.Insets.render(layoutData.insets, td, "padding");
                 Echo.Sync.Alignment.render(layoutData.alignment, td, true, this.component);
                 Echo.Sync.FillImage.render(layoutData.backgroundImage, td);
@@ -620,23 +590,22 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._renderRowStyle(rowIndex);
     },
     
-    _buildColGroup: function(colCount, columnWeights) {
-		var colgroup = document.createElement("colgroup");
-		
-		var colWeight = [];
-		if (columnWeights) {
-			colWeight = columnWeights.split(" ");
-		} else {
-			for (var i = 0; i < colCount; i++) {
-				colWeight[i] = (100/colCount);
-			}
-		}		
-		for (var i = 0; i < colCount; i++) {
-			var col = document.createElement("col");
-			col.style.width = colWeight[i] + "%";
-			colgroup.appendChild(col);
-		}
-		return colgroup;
+    _buildColGroup: function() {
+    	var colGroupElement = document.createElement("colgroup");	
+        for (var i = 0; i < this._columnCount; ++i) {
+            var colElement = document.createElement("col");
+            width = this.component.renderIndex("columnWidth", i); 
+            if (width == null) {
+            	colElement.style.width = (100 / this._columnCount) + "%";
+            } else if (Echo.Sync.Extent.isPercent(width)) {
+                colElement.style.width = width.toString();
+            } else {
+                var columnPixels = Echo.Sync.Extent.toPixels(width, true);
+                colElement.style.width = this._columnWidths[i] + "px";
+            }
+            colGroupElement.appendChild(colElement);
+        }
+      	return colGroupElement;
 	}
     
 });
@@ -782,7 +751,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	
 	onDown: function (e) {
 		this._resizeGhost = document.getElementById("rrr");
-		this._startX = e.clientX; 
+		this._startX = 0; 
 		this._initTableWidth = this.getColRatioWidth();
 		this._offset = this.getOffset(this._col);
 		this._resizeGhost.style.display = "block";
@@ -790,15 +759,24 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onMove: function (delta) {
-		this._offset += delta.x;
-		this._resizeGhost.style.left = this._offset + "px";
+		this._startX += delta.x;
+		this._resizeGhost.style.left = (this._offset + this._startX) + "px";
 	},
 	
 	onUp: function (event) {
-		this._thisRef._colgroup.firstChild.width = (this._offset - 5) + "px";
-		this._thisRef._colgroup_body.firstChild.width = (this._offset - 5) + "px";
-		this._thisRef._tableHeader.style.width = "450px";
-		this._thisRef._table.style.width = "450px";
+		var newWidth = parseInt(this._thisRef._colGroupHeader.children[0].style.width); 
+		newWidth += this._startX;
+    	var t1Row = this._thisRef._table.rows[0];
+    	for (var i = 0; i < t1Row.cells.length; i++) {
+    		var w = (i == 0 ? this._startX : 0) + t1Row.cells[i].offsetWidth
+	    	this._thisRef._colGroupHeader.children[i].style.width = w + "px";
+	    	this._thisRef._colGroupBody.children[i].style.width = w + "px";
+   		}
+		
+		var newWidthTable = parseInt(this._thisRef._table.offsetWidth); 
+		newWidthTable += this._startX;
+		this._thisRef._table.style.width = newWidthTable + "px";
+		this._thisRef._tableHeader.style.width = newWidthTable + "px";
 		this._resizeGhost.style.display = "none";
 	},
 });

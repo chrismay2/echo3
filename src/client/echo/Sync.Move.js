@@ -40,7 +40,11 @@ Echo.MouseListener = Core.extend({
                            return event.targetTouches[0].pageX - totalOffsetX;
                     }                                      
              } else {
+             	if (absolute) {
+             		return event.screenX;
+             	} else {
                     return event.offsetX;
+                }
              }
        },
 
@@ -72,8 +76,8 @@ Echo.MouseListener = Core.extend({
        },
 
        _onDown: function(event) {
-            var posAbs = {      x: this.getX(event, true), y: this.getY(event, true) };
-            var posRel = {      x: this.getX(event, false), y: this.getY(event, false) };
+            var posAbs = { x: this.getX(event, true), y: this.getY(event, true) };
+            var posRel = { x: this.getX(event, false), y: this.getY(event, false) };
             this._previousX = posAbs.x;
             this._previousY = posAbs.y;           
 
@@ -82,7 +86,6 @@ Echo.MouseListener = Core.extend({
         	Core.Web.DOM.preventEventDefault(event);
         	Core.Web.Event.add(document.body, this.MOVE, this._methodMoveRef, true);
         	Core.Web.Event.add(document.body, this.UP, this._methodUpRef, true);
-
 	 		this.onDown(event);
        },
 

@@ -670,6 +670,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
         this.addTestButton("Verticals Bars", function() {
         	that._showTable("verticals");
     	});	
+    	
+    	this._showTable("verticals");
      },
 
 	 _showTable: function(style) {
@@ -703,7 +705,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    height: "80%",
 		    selection: "0",
 		    margins: "5px",		
-		    columnWeights: "40 15 15 30",    
+		    columnWidth: ["40%", "15%", "15%", "30%"],    
 			children: children
 		}
 		this.content.set("background", "#ffffff");
