@@ -1644,7 +1644,7 @@ Core.Web.HttpConnection = Core.extend({
             }
         };
         
-        this._xmlHttpRequest.open(this._method, this._url, true);
+     //   this._xmlHttpRequest.open(this._method, this._url, true);
 
         // Set headers.
         if (this._requestHeaders && (usingActiveXObject || this._xmlHttpRequest.setRequestHeader)) {
@@ -1667,7 +1667,7 @@ Core.Web.HttpConnection = Core.extend({
             // serialize before sending
             this._xmlHttpRequest.send(this._messageObject ? new XMLSerializer().serializeToString(this._messageObject) : null);
         } else {
-            this._xmlHttpRequest.send(this._messageObject ? this._messageObject : null);
+           // this._xmlHttpRequest.send(this._messageObject ? this._messageObject : null);
         }
     },
     

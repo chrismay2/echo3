@@ -35,7 +35,7 @@ TestApp = Core.extend(Echo.Application, {
         while (testScreen.testSelectSplitPane.children.length > 1) {
             testScreen.testSelectSplitPane.remove(1);
         }
-        var test = TestApp.Tests["Table"];
+        var test = TestApp.Tests["ButtonAlignment"];
         var instance = new test();
         testScreen.testSelectSplitPane.add(instance);        
     }
@@ -433,10 +433,10 @@ TestApp.Tests.WindowPane = Core.extend(TestApp.TestPane, {
     }
 });
 
-TestApp.Tests.ButtonAlignment = Core.extend(TestApp.TestPane, {
+TestApp.Tests.ButtonAlignment = Core.extend(Echo.Column, {
 
     $construct: function() {
-        TestApp.TestPane.call(this);
+        Echo.Column.call(this);
 
         var middlealign = {horizontal: "center", vertical: "middle"};
         var rightalign = {horizontal: "right", vertical: "middle"};
@@ -581,7 +581,7 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
         Echo.Grid.call(this, {
             size: 4,
             insets: "10px 20px",
-            background: "#ddeeff",
+            background: "#ddeeff"
         });
 
         this._addSelectField("No border", {

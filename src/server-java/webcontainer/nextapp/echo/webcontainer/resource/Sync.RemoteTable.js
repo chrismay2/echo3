@@ -143,6 +143,12 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         if (!isHeader && this._horizontalLine) {
 	        tdPrototype.style.borderBottom = this._horizontalLine;
 	    }
+	    if (isHeader) {
+	    	//this is needed for the absolute positioning
+	    	//of the resizeHandle (display:inline does not work in IE8)
+			tdPrototype.style.position = "relative";
+			tdPrototype.style.textAlign = "left";
+	    }
         
         tdPrototype.style.padding = this._defaultCellPadding;
     
@@ -156,13 +162,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             if (isHeader) {
             	var resizeHandle = document.createElement("span");
             	resizeHandle.id = "COL_" + columnIndex;
-            	//resizeHandle.style.background = "#7777aa";
+            	resizeHandle.style.background = "#7777aa";
+            	resizeHandle.style.position = "absolute";
             	resizeHandle.style.cursor = "col-resize";
-            	resizeHandle.style.display = "inline";
             	resizeHandle.style.float = "right";
-            	resizeHandle.style.height = "24px";
-            	resizeHandle.style.margin = "-6px -10px -9px 0px";
+            	resizeHandle.style.height = "100%";
             	resizeHandle.style.width = "6px";
+            	resizeHandle.style.right = "-4px";
+            	resizeHandle.style.marginTop = "-8px";
             	resizeHandle.style.zIndex = "10000";
             	td.appendChild(resizeHandle);
             }
@@ -723,24 +730,6 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	_offset : 0,
 	_targetColumn: null,
 	              	
-   	getOffset: function() {
-		var tr = this._resizeHandle.parentElement.parentElement;
-		var bso = this._mainDiv.scrollLeft;
-		var colsWidth = 0;
-		var i = 0;
-		var th = tr.firstChild;
-		while(i++ < this._col + 1) {
-			//IE: if (x.currentStyle)
-			// in IE 	var y = x.clientWidth - parseInt(x.currentStyle["paddingLeft"]) - parseInt(x.currentStyle["paddingRight"]);
-			var y = document.defaultView.getComputedStyle(th,null).getPropertyValue("width");
-			colsWidth += parseInt(y);
-			this._targetColumn = th;
-			th = th.nextSibling;
-		}
-		var offset = colsWidth + 3 + 15 - bso;
-		return offset;
-	},
-	
 	getColRatioWidth: function() {
 		var tw = 0;
 		//for(var i = 0; i < options.colratio.length; i++){
@@ -753,7 +742,12 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 		this._resizeGhost = document.getElementById("rrr");
 		this._startX = 0; 
 		this._initTableWidth = this.getColRatioWidth();
-		this._offset = this.getOffset(this._col);
+		
+		var t1Row = this._thisRef._table.rows[0];
+		this._offset = -3;
+		for(var i = 0; i <= this._col; i++){
+    		this._offset += t1Row.cells[i].offsetWidth;
+    	}
 		this._resizeGhost.style.display = "block";
 		this._resizeGhost.style.left = this._offset + "px";
 	},
@@ -764,11 +758,13 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onUp: function (event) {
-		var newWidth = parseInt(this._thisRef._colGroupHeader.children[0].style.width); 
+	
+		var newWidth = parseInt(this._thisRef._colGroupHeader.children[this._col].style.width); 
 		newWidth += this._startX;
     	var t1Row = this._thisRef._table.rows[0];
+    	//set header and body column widths to pixel values
     	for (var i = 0; i < t1Row.cells.length; i++) {
-    		var w = (i == 0 ? this._startX : 0) + t1Row.cells[i].offsetWidth
+    		var w = (i == this._col ? this._startX : 0) + t1Row.cells[i].offsetWidth
 	    	this._thisRef._colGroupHeader.children[i].style.width = w + "px";
 	    	this._thisRef._colGroupBody.children[i].style.width = w + "px";
    		}
@@ -778,5 +774,5 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 		this._thisRef._table.style.width = newWidthTable + "px";
 		this._thisRef._tableHeader.style.width = newWidthTable + "px";
 		this._resizeGhost.style.display = "none";
-	},
+	}
 });

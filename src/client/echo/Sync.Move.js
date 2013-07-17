@@ -9,7 +9,7 @@ Echo.MouseListener = Core.extend({
     _methodMoveRef: null,
     _methodUpRef: null,                  
 
-     init2: function() {
+    init2: function() {
         var isIPad = navigator.userAgent.match(/iPad/i) != null;
         var isAndroid = navigator.userAgent.match(/Android/i) != null;
         var isTouch = isIPad || isAndroid;
@@ -24,7 +24,7 @@ Echo.MouseListener = Core.extend({
 	$virtual: {
         onDown: function() { },
         onMove: function() { },
-        onUp: function() { },
+        onUp: function() { }
     },
     
        getX: function(event, absolute) {
