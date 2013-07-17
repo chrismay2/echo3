@@ -35,7 +35,7 @@ TestApp = Core.extend(Echo.Application, {
         while (testScreen.testSelectSplitPane.children.length > 1) {
             testScreen.testSelectSplitPane.remove(1);
         }
-        var test = TestApp.Tests["ButtonAlignment"];
+        var test = TestApp.Tests["Table"];
         var instance = new test();
         testScreen.testSelectSplitPane.add(instance);        
     }
@@ -680,12 +680,26 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	        this.content.remove(0);
 	    }
 
+		var splitPane = new Echo.SplitPane({
+			orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
+			resizable: true
+		});
+		this.content.add(splitPane);
+		
+		var splitPane2 = new Echo.SplitPane({
+			orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
+			resizable: true,
+			separatorPosition: "100px"
+		});
+		splitPane.add(splitPane2);
+		splitPane2.add(new Echo.Label());
+		
 		var childrenTexts = [
 			"Employee", "Salary", "Bonus", "Supervisor",
 			"Stephen C. Cox", "$300", "$50", "Bob",
 			"Josephin Tan", "$150", "-", "Annie",
 			"Joyce Ming", "$200", "$35", "Andy",
-			"James A. Pentel", "$175", "$25", "Annie"];
+			"James Albert Pentel", "$175", "$25", "Annie"];
 
 		var children = [];
 		for (var i = 0; i < childrenTexts.length; i++) {
@@ -701,10 +715,10 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	var attr = {
 		    columnCount: 4,
 		    rowCount: children.length / 4 - 1,
-		    width: "400px",
-		    height: "80%",
+		    //width: "400px",
+		    //height: "75%",
 		    selection: "0",
-		    margins: "5px",		
+		    margins: "15px 15px",		
 		    columnWidth: ["40%", "15%", "15%", "30%"],    
 			children: children
 		}
@@ -751,6 +765,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.insets = "10px 5px";
 		    attr.verticalLine = "3px solid #dddddd";
 		    attr.foreground = "gray";
+		    attr.background = "#f4f4f4";
 		    attr.headerForeground = "gray";
 	 	} else if (style === "xxxx") {
 	 	 	//"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
@@ -772,6 +787,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		//   headerVisible: false,
 		
 	 	var table = new Echo.Sync.RemoteTable(attr);
-	    this.content.add(table);
+	    splitPane2.add(table);
 	 }
 });

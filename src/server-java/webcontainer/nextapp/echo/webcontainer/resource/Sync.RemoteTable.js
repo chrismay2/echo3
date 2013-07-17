@@ -68,13 +68,16 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      */
     _useDefaultSelectionStyle: false,
     
-	_margins: 15,
-	
+    /**
+     * The colgroup element defining the column widths of the header table
+     * (should always be same values as the colgroup of the body)
+     */
 	_colGroupHeader: null,
-			
+	
+	/**
+     * The colgroup element defining the column widths of the body table
+     */
 	_colGroupBody: null,
-			
-//	_resizeGhost: null,
 	
     
     /** Constructor. */
@@ -156,13 +159,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             var td = tdPrototype.cloneNode(false);
             tr.appendChild(td);
             if (columnIndex == 0 && this._verticalLine) {
-            	//draw the left-most border
+            	//draw the left-most vertical line
             	td.style.borderLeft = this._verticalLine;
             }
             if (isHeader) {
+            	//the (invisible) resize handle attached at the right
+            	//side of every header cell
             	var resizeHandle = document.createElement("span");
-            	resizeHandle.id = "COL_" + columnIndex;
-            	resizeHandle.style.background = "#7777aa";
+            	//resizeHandle.style.background = "#7777aa";
             	resizeHandle.style.position = "absolute";
             	resizeHandle.style.cursor = "col-resize";
             	resizeHandle.style.float = "right";
@@ -178,8 +182,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     },
 
     /**
-     * Returns the table row index of the given TR element,
-     * accounting for header visibility.
+     * Returns the table row index of the given TR element
      * 
      * @param {Element} element the TR table row element
      * @return the index of the specified row, or -1 if it cannot be found
@@ -275,21 +278,21 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     renderAdd: function(update, parentElement) {
         this._columnCount = parseInt(this.component.render("columnCount"), 10);
         this._rowCount = parseInt(this.component.render("rowCount"), 10);
+        this._height = this.component.render("height");
+        this._width = this.component.render("width");
         this._selectionEnabled = this.component.render("selectionEnabled");
         this._rolloverEnabled = this.component.render("rolloverEnabled");
-        this._defaultInsets = this.component.render("insets", 0);
         this._headerVisible = this.component.render("headerVisible", true);
         this._zebraBackground = this.component.render("zebraBackground");
         this._verticalLine = this.component.render("verticalLine");
         this._horizontalLine = this.component.render("horizontalLine");
         this._columnWeights = this.component.render("columnWeights");
-        
+        this._defaultInsets = this.component.render("insets", 0);
         this._defaultPixelInsets = Echo.Sync.Insets.toPixels(this._defaultInsets);
         this._defaultCellPadding = Echo.Sync.Insets.toCssValue(this._defaultInsets);        
         this._useDefaultSelectionStyle = this._selectionEnabled && !this.component.render("selectionForeground") &&
                 !this.component.render("selectionBackground") && !this.component.render("selectionBackgroundImage") &&
                 !this.component.render("selectionFont");
-        
         
         if (this._selectionEnabled) {
             this.selectionModel = new Echo.Sync.RemoteTable.ListSelectionModel(
@@ -299,14 +302,19 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._div = document.createElement("div");
         this._div.id = this.component.renderId;
         this._div.style.position = "relative";
+        this._div.style.overflow = "hidden";
         Echo.Sync.RoundedCorner.render(this.component.render("radius"), this._div);
         Echo.Sync.BoxShadow.render(this.component.render("boxShadow"), this._div);
         Echo.Sync.Border.render(this.component.render("border"), this._div);
         Echo.Sync.Color.render(this.component.render("background"), this._div, "backgroundColor");
         Echo.Sync.FillImage.render(this.component.render("backgroundImage"), this._div);
-        this._div.style.overflow = "hidden";
-        this._div.style.margin = "15px"; //XXX
-        this._div.style.height = "250px"; //XXX
+        Echo.Sync.Insets.render(this.component.render("margins"), this._div, "margin");
+        if (this._height) {
+   	        this._div.style.height = Echo.Sync.Extent.toCssValue(this._height, false, true);
+	    }
+        if (this._width) {
+            this._div.style.width = Echo.Sync.Extent.toCssValue(this._width, true, true);
+   		}     
         this._div.style.textAlign = "left";
         parentElement.appendChild(this._div);
 
@@ -350,14 +358,16 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 	        this._tableHeader.appendChild(this._tbodyHeader);
         }
 
+		//create body div element
         this._divTable = document.createElement("div");
-        this._divTable.style.position = "absolute";
-       
+        this._divTable.style.position = "absolute";       
         this._divTable.style.bottom = "0px";
         this._divTable.style.left = "0px";
         this._divTable.style.right = "0px";
         this._divTable.style.overflow = "auto";
 		this._div.appendChild(this._divTable);
+		
+		//sync header and body scolls
 		var that = this;
    		this._divTable.onscroll = function(e) {
 			that._divHeader.scrollLeft = that._divTable.scrollLeft;
@@ -374,9 +384,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._colGroupBody = this._buildColGroup();
         this._table.appendChild(this._colGroupBody);
         
-        var width = this.component.render("width");
-        if (width) {
-            this._div.style.width = width;
+        if (this._width) {
             this._table.style.width = "100%";
         }
         
@@ -417,10 +425,27 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
     /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
+    	var headerHeight = this._tableHeader.clientHeight;
+		if (!this._width) {
+			//if width is not set then adjust outer div accordingly
+			var actualTableWidth = this._table.clientWidth;
+    		this._div.style.width = (actualTableWidth) + "px";
+			if (this._tableHeader.clientWidth > this._divHeader.clientWidth) {
+				console.log(this._divHeader.clientWidth + "->" + this._tableHeader.clientWidth);
+				//header table is larger than body table -> increase size
+				this._div.style.width = this._tableHeader.clientWidth + "px";
+			}
+		}
+		if (!this._height) {
+			//height is not set, so calculate it and adjust outer div accordingly
+			var actualTableHeight = this._table.clientHeight;
+    		this._div.style.height = (headerHeight + actualTableHeight) + "px";
+		}
+		
+    	this._divHeader.style.height = headerHeight + "px";
+    	this._divTable.style.top = headerHeight + "px";
 		var scroll = this._divTable.scrollHeight > this._divTable.clientHeight;
     	this._divHeader.style.marginRight = scroll ? "17px" : "0px";
-    	this._divHeader.style.height = this._tableHeader.clientHeight + "px";
-    	this._divTable.style.top = this._tableHeader.clientHeight + "px";
     	
     	//sync header column widths with main table widths
     	if (this._table.rows.length > 0) {
