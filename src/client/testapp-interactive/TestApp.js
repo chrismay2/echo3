@@ -646,7 +646,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
         TestApp.TestPane.call(this);
 
 		var that = this;
-		this._chkBigData = new Echo.CheckBox({text: "Big data", insets: "5px"});
+		this._chkBigData = new Echo.CheckBox({selected: true, text: "Big data", insets: "5px"});
 	    this.controlsColumn.add(this._chkBigData);
 		
         this.addTestButton("Default", function() {
@@ -689,7 +689,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		var splitPane2 = new Echo.SplitPane({
 			orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
 			resizable: true,
-			separatorPosition: "100px"
+			separatorPosition: "200px"
 		});
 		splitPane.add(splitPane2);
 		splitPane2.add(new Echo.Label());
@@ -702,9 +702,9 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 			"James Albert Pentel", "$175", "$25", "Annie"];
 
 		var children = [];
-		children[0] = new Echo.CheckBox({text: childrenTexts[0], border: "1px solid #665566", icon: "img/test.png"});
+		//children[0] = new Echo.CheckBox({text: childrenTexts[0], border: "1px solid #665566", icon: "img/test.png"});
 		
-		for (var i = 1; i < childrenTexts.length; i++) {
+		for (var i = 0; i < childrenTexts.length; i++) {
 			children[i] = new Echo.Label({text: childrenTexts[i]});
 		}
 		
@@ -719,9 +719,9 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    rowCount: children.length / 4 - 1,
 		    width: "80%",
 		    height: "250px",
-		    selection: "0",
+		    selection: "2",
 		    margins: "15px 15px",		
-		    columnWidth: ["40%", "15%", "15%", "30%"],    
+		    columnWidth: ["20%", "30%", "25%", "25%"],    
 			children: children
 		}
 		this.content.set("background", "#ffffff");
