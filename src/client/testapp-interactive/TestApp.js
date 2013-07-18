@@ -695,14 +695,16 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		splitPane2.add(new Echo.Label());
 		
 		var childrenTexts = [
-			"Employee", "Salary", "Bonus", "Supervisor",
+			"Employee", "Net Salary", "Bonus", "Supervisor",
 			"Stephen C. Cox", "$300", "$50", "Bob",
 			"Josephin Tan", "$150", "-", "Annie",
 			"Joyce Ming", "$200", "$35", "Andy",
 			"James Albert Pentel", "$175", "$25", "Annie"];
 
 		var children = [];
-		for (var i = 0; i < childrenTexts.length; i++) {
+		children[0] = new Echo.CheckBox({text: childrenTexts[0], border: "1px solid #665566", icon: "img/test.png"});
+		
+		for (var i = 1; i < childrenTexts.length; i++) {
 			children[i] = new Echo.Label({text: childrenTexts[i]});
 		}
 		
@@ -715,8 +717,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	var attr = {
 		    columnCount: 4,
 		    rowCount: children.length / 4 - 1,
-		    //width: "400px",
-		    //height: "75%",
+		    width: "80%",
+		    height: "250px",
 		    selection: "0",
 		    margins: "15px 15px",		
 		    columnWidth: ["40%", "15%", "15%", "30%"],    
