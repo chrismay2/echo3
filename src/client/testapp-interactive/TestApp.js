@@ -716,7 +716,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		
 	 	var attr = {
 		    columnCount: 4,
-		    rowCount: children.length / 4 - 1,
+		    rowCount: children.length / 4 ,
 		    width: "80%",
 		    height: "250px",
 		    selection: "2",

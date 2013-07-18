@@ -136,54 +136,49 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      * @return the prototype TR row element hierarchy
      * @type Element
      */
-    _createRowPrototype: function() {
+    _createRowPrototype: function(isHeader) {
         var tr = document.createElement("tr");
     
-        var tdPrototype = document.createElement("td");
-        tdPrototype.style.display = "table-cell";
+        var tdPrototype = document.createElement(isHeader ? "th" : "td");
         if (this._verticalLine) {
 	        tdPrototype.style.borderRight = this._verticalLine;
 	    }
-        if (this._horizontalLine) {
+        if (!isHeader && this._horizontalLine) {
 	        tdPrototype.style.borderBottom = this._horizontalLine;
 	    }
+	    if (isHeader) {
+	    	//this is needed for the absolute positioning
+	    	//of the resizeHandle (display:inline does not work in IE8)
+			tdPrototype.style.position = "relative";
+			tdPrototype.style.textAlign = "left";
+	    }
+        
         tdPrototype.style.padding = this._defaultCellPadding;
-   
+    
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
+            tr.appendChild(td);
             if (columnIndex == 0 && this._verticalLine) {
             	//draw the left-most vertical line
             	td.style.borderLeft = this._verticalLine;
             }
-            tr.appendChild(td);
+            if (isHeader) {
+            	//the (invisible) resize handle attached at the right
+            	//side of every header cell
+            	var resizeHandle = document.createElement("span");
+            	resizeHandle.style.background = "#7777aa";
+            	resizeHandle.style.position = "absolute";
+            	resizeHandle.style.cursor = "col-resize";
+            	resizeHandle.style.float = "right";
+            	resizeHandle.style.height = "100%";
+            	resizeHandle.style.width = "6px";
+            	resizeHandle.style.right = "-4px";
+            	resizeHandle.style.marginTop = "-8px";
+            	resizeHandle.style.zIndex = "10000";
+            	td.appendChild(resizeHandle);
+            }
         }
         return tr;
-	},
-
-    _createHeaderPrototype: function() {
-        var tr = document.createElement("tr");
-		tr.style.display = "block";
-		tr.style.position = "relative";
-    
-        var thPrototype = document.createElement("th");
-        thPrototype.style.padding = "5px 5px";
-        
-        var handlePrototype = document.createElement("td");
-        handlePrototype.style.width = "6px";
-        //handlePrototype.style.backgroundColor = "#666666";
-        handlePrototype.style.cursor = "col-resize";
-        if (this._verticalLine) {
-	        handlePrototype.style.borderRight = this._verticalLine;
-	    }
-			
-        for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
-            tr.appendChild(thPrototype.cloneNode(false));
-            var resizeHandle = handlePrototype.cloneNode(false);
-            var resizeListener = new ColumnResizeListener(columnIndex, resizeHandle, this);
-			resizeListener.addMoveListener(resizeHandle);
-			tr.appendChild(resizeHandle);			            
-        }
-        return tr;        
     },
 
     /**
@@ -306,8 +301,8 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         this._div = document.createElement("div");
         this._div.id = this.component.renderId;
+        this._div.style.position = "relative";
         this._div.style.overflow = "hidden";
-        this._div.style.textAlign = "left";
         Echo.Sync.RoundedCorner.render(this.component.render("radius"), this._div);
         Echo.Sync.BoxShadow.render(this.component.render("boxShadow"), this._div);
         Echo.Sync.Border.render(this.component.render("border"), this._div);
@@ -320,44 +315,89 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         if (this._width) {
             this._div.style.width = Echo.Sync.Extent.toCssValue(this._width, true, true);
    		}     
+        this._div.style.textAlign = "left";
         parentElement.appendChild(this._div);
 
+        if (this._headerVisible) {
+        	this._divHeader = document.createElement("div");
+        	this._divHeader.style.marginRight = "17px";
+        	//this._divHeader.style.height = "24px";
+        	this._divHeader.style.overflow = "hidden";
+      	    Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader, "backgroundColor");
+      	    Echo.Sync.Color.render(this.component.render("headerForeground"), this._divHeader, "color");
+      	    var separatorLine = this.component.render("separatorLine");
+      	    if (separatorLine) {
+			    this._divHeader.style.borderBottom = separatorLine;
+		    }
+	        this._div.appendChild(this._divHeader);
 
+			//this div just sets the background of the upper right corner
+        	this._divHeader2 = document.createElement("div");
+        	this._divHeader2.style.position = "absolute";
+        	this._divHeader2.style.right = "0px";
+        	this._divHeader2.style.top = "0px";
+        	this._divHeader2.style.width = "17px";
+        	//this._divHeader2.style.height = "24px";
+      	    Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader2, "backgroundColor");
+      	    Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader2, "backgroundColor");
+            this._div.appendChild(this._divHeader2);
+            
+        	this._tableHeader = document.createElement("table");
+        	this._tableHeader.style.width = "100%";
+        	this._tableHeader.style.height = "100%";
+			this._tableHeader.style.borderCollapse = "collapse";
+	        this._divHeader.appendChild(this._tableHeader);
+	        
+	        this._colGroupHeader = document.createElement("colgroup");
+	        for (var i = 0; i < this._columnCount; ++i) {
+	            this._colGroupHeader.appendChild(document.createElement("col"));
+	        }
+	        this._tableHeader.appendChild(this._colGroupHeader);
+        
+        	this._tbodyHeader = document.createElement("tbody");
+	        this._tableHeader.appendChild(this._tbodyHeader);
+        }
+
+		//create body div element
+        this._divTable = document.createElement("div");
+        this._divTable.style.position = "absolute";       
+       
+        this._divTable.style.bottom = "0px";
+        this._divTable.style.left = "0px";
+        this._divTable.style.right = "0px";
+        this._divTable.style.overflow = "auto";
+		this._div.appendChild(this._divTable);
+		
+		//sync header and body scolls
+		var that = this;
+   		this._divTable.onscroll = function(e) {
+			that._divHeader.scrollLeft = that._divTable.scrollLeft;
+ 		};
+        
         this._table = document.createElement("table");
-        Echo.Sync.renderComponentDefaults(this.component, this._table);
-        this._table.style.borderCollapse = "separate";
         this._table.style.borderSpacing = "0px";
         if (this._selectionEnabled) {
             this._table.style.cursor = "pointer";
         }
+        Echo.Sync.renderComponentDefaults(this.component, this._table);
+        this._divTable.appendChild(this._table);
+
+        this._colGroupBody = this._buildColGroup();
+        this._table.appendChild(this._colGroupBody);
+        
         if (this._width) {
             this._table.style.width = "100%";
         }
-        this._div.appendChild(this._table);
-
-        this._thead = document.createElement("thead");
-        this._thead.style.verticalAlign = "middle";
-        this._thead.style.right = "0px";
         
-        this._thead.style.position = "relative";
-        
-        this._table.appendChild(this._thead);
-
         this._tbody = document.createElement("tbody");
-        this._tbody.style.display = "block";
-        this._tbody.style.height = "230px";
-        this._tbody.style.width = "100%";
-        this._tbody.style.overflow = "auto";
         this._table.appendChild(this._tbody);
-
-        this._colGroupBody = this._buildColGroup(true);
-        this._tbody.appendChild(this._colGroupBody);
-
-		//add content to rows        
-        var trHeaderPrototype = this._createHeaderPrototype();
-        this._thead.appendChild(this._renderRow(update, Echo.Sync.RemoteTableSync._HEADER_ROW, trHeaderPrototype));
         
-        var trPrototype = this._createRowPrototype();       
+        if (this._headerVisible) {
+	        var trHeaderPrototype = this._createRowPrototype(true);
+            this._tbodyHeader.appendChild(this._renderRow(update, Echo.Sync.RemoteTableSync._HEADER_ROW, trHeaderPrototype));
+        }
+        
+        var trPrototype = this._createRowPrototype(false);        
         for (var rowIndex = 0; rowIndex < this._rowCount; rowIndex++) {
         	var zebra = rowIndex % 2 == 1 ? null : this._zebraBackground;
             this._tbody.appendChild(this._renderRow(update, rowIndex, trPrototype, zebra));
@@ -386,6 +426,58 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
     /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
+    	var headerHeight = this._tableHeader.clientHeight;
+		if (!this._width) {
+			//if width is not set then adjust outer div accordingly
+			var actualTableWidth = this._table.clientWidth;
+    		this._div.style.width = (actualTableWidth) + "px";
+			if (this._tableHeader.clientWidth > this._divHeader.clientWidth) {
+				console.log(this._divHeader.clientWidth + "->" + this._tableHeader.clientWidth);
+				//header table is larger than body table -> increase size
+				this._div.style.width = this._tableHeader.clientWidth + "px";
+			}
+		}
+		if (!this._height) {
+			//height is not set, so calculate it and adjust outer div accordingly
+			var actualTableHeight = this._table.clientHeight;
+    		this._div.style.height = (headerHeight + actualTableHeight) + "px";
+		}
+		
+    	this._divHeader.style.height = headerHeight + "px";
+    	this._divTable.style.top = headerHeight + "px";
+		var scroll = this._divTable.scrollHeight > this._divTable.clientHeight;
+    	this._divHeader.style.marginRight = scroll ? "17px" : "0px";
+    	
+    	if (this._table.rows.length === 0) return;
+    	
+    	//sync header column widths with main table widths
+		var t0Row = this._tableHeader.rows[0];
+    	var t1Row = this._table.rows[0];
+    	for (var i = 0; i < t1Row.cells.length; i++) {
+	    	this._colGroupHeader.children[i].style.width = t1Row.cells[i].offsetWidth + "px"; 
+		}
+
+		var deltaSum = 0;
+    	for (var i = 0; i < t1Row.cells.length; i++) {
+   		 	var w0 = t0Row.cells[i].offsetWidth;
+   		 	var w1 = t1Row.cells[i].offsetWidth;
+	 		if (w0 === 0) break;
+	 		var delta = w0 - w1;
+	 		if (delta > 0) {
+		 		//console.log(i + " --> " + (w0 - 14) + "px");
+		 		t1Row.cells[i].style.minWidth = (w0 - 14) + "px"; 
+	 		} else if (delta < -10) {
+		 		console.log(i + " -<< " + (w1) + "px: " + delta);
+		 		t0Row.cells[i].style.minWidth = (w1  - 14) + "px"; 
+			}
+			deltaSum += delta;
+   		}
+   		
+ //  		var newWidthTable = parseInt(this._table.offsetWidth); 
+//		this._table.style.width = (newWidthTable + delta)+ "px";
+//		this._tableHeader.style.width = (newWidthTable + delta) + "px";
+   		
+    	
     },
 
     /** @see Echo.Render.ComponentSync#renderDispose */
@@ -469,15 +561,24 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      * @type Element
      */
     _renderRow: function(update, rowIndex, trPrototype, zebra) {
-        var tr =  (rowIndex === -1) ? trPrototype : trPrototype.cloneNode(true);
+        var tr = trPrototype ? trPrototype.cloneNode(true) : this._createRowPrototype(false);
 		if (zebra) {
 			tr.style.background = zebra;
 		}
+		if (rowIndex === 0) {
+			tr.style.maxHeight = "0px";
+		}	
         
         var td = tr.firstChild;
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {        
+        	if (this._headerVisible && rowIndex === -1) {
+	 	       	var resizeHandle = td.firstChild;
+        		var resizeListener = new ColumnResizeListener(columnIndex, resizeHandle, this);
+				resizeListener.addMoveListener(resizeHandle);   
+			}        
         
             var child = this.component.getComponent((rowIndex + (this._headerVisible ? 1 : 0)) * this._columnCount + columnIndex);
+            if (!child) break;  //XXX
             var layoutData = child.render("layoutData");            
             if (layoutData) {
                 Echo.Sync.Insets.render(layoutData.insets, td, "padding");
@@ -485,12 +586,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 Echo.Sync.FillImage.render(layoutData.backgroundImage, td);
                 Echo.Sync.Color.render(layoutData.background, td, "backgroundColor");
             }
-			
+    
             Echo.Render.renderComponentAdd(update, child, td);
             td = td.nextSibling;
-            if (rowIndex === -1) {
-                td = td.nextSibling;
-    		}
         }
         return tr;
     },
@@ -552,7 +650,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._renderRowStyle(rowIndex);
     },
     
-    _buildColGroup: function(isHeader) {
+    _buildColGroup: function() {
     	var colGroupElement = document.createElement("colgroup");	
         for (var i = 0; i < this._columnCount; ++i) {
             var colElement = document.createElement("col");
@@ -563,15 +661,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 colElement.style.width = width.toString();
             } else {
                 var columnPixels = Echo.Sync.Extent.toPixels(width, true);
-                colElement.style.width = columnPixels + "px";
+                colElement.style.width = this._columnWidths[i] + "px";
             }
             colGroupElement.appendChild(colElement);
-            
-            if (isHeader) {
-	            var colResizeHandle = document.createElement("col");
-                colResizeHandle.style.width = "0%";
-	            colGroupElement.appendChild(colResizeHandle);
-	        }            
         }
       	return colGroupElement;
 	}
@@ -704,7 +796,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 		this._startX = 0; 
 		this._initTableWidth = this.getColRatioWidth();
 		
-		var t1Row = this._thisRef._table.rows[0];
+		var t1Row = this._thisRef._tableHeader.rows[0];
 		this._offset = -3;
 		for(var i = 0; i <= this._col; i++){
     		this._offset += t1Row.cells[i].offsetWidth;
