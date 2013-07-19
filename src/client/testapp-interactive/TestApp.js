@@ -684,15 +684,20 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 			orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
 			resizable: true
 		});
-		this.content.add(splitPane);
+//		this.content.add(splitPane);
 		
 		var splitPane2 = new Echo.SplitPane({
 			orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
 			resizable: true,
-			separatorPosition: "200px"
+			separatorPosition: "0px"
 		});
-		splitPane.add(splitPane2);
-		splitPane2.add(new Echo.Label());
+//		splitPane.add(splitPane2);
+//		splitPane2.add(new Echo.Label());
+		
+		var col = new Echo.Row({background: "#a4f4f4"});
+		this.content.add(col);
+		
+		
 		
 		var childrenTexts = [
 			"Employee", "Net Salary", "Bonus", "Supervisor",
@@ -717,11 +722,12 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	var attr = {
 		    columnCount: 4,
 		    rowCount: children.length / 4 ,
-		    width: "80%",
-		    height: "250px",
+		   // width: "550px",
+		    height: "280px",
 		    selection: "2",
 		    margins: "15px 15px",		
-		    columnWidth: ["20%", "30%", "25%", "25%"],    
+		   // columnWidth: ["20px", "100px", "20px", "100px"],
+		    //columnWidth: ["20%", "30%", "25%", "25%"],    
 			children: children
 		}
 		this.content.set("background", "#ffffff");
@@ -789,6 +795,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		//   headerVisible: false,
 		
 	 	var table = new Echo.Sync.RemoteTable(attr);
-	    splitPane2.add(table);
+	    col.add(table);
 	 }
 });

@@ -1,3 +1,4 @@
+
 /**
   Remote Table component.
  */
@@ -16,6 +17,7 @@ Echo.Sync.RemoteTable = Core.extend(Echo.Component, {
          * @type Color
          */
         DEFAULT_SELECTION_FOREGROUND: "#ffffff"
+        
     },
     
     $load: function() {
@@ -50,13 +52,25 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
          * @type Number
          */
         _HEADER_ROW: -1,
+
+        _RESIZE_COLGROUP_PIXEL: 0,
+        _RESIZE_COLGROUP_PERCENT: 1,
+        
+        /**
+         * This is the case when no width is set, and the table is sized according to its content
+         */	
+        _RESIZE_TABLE_WIDTH: 2,
         
         /**
          * Array of properties which may be updated without full re-render.
          * @type Array
          */
-        _supportedPartialProperties: ["selection"]
+        _supportedPartialProperties: ["selection"],
+        
     },
+
+    CSS_COL_STYLE: [],
+       
     
     $load: function() {
         Echo.Render.registerPeer("RemoteTable", this);
@@ -79,11 +93,21 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      */
 	_colGroupBody: null,
 	
+	_resizePoliy: 2,
     
     /** Constructor. */
     $construct: function() {
         this.selectionModel = null;
         this.lastSelectedIndex = null;
+        
+       	for (var i = 0; i < 4; i++) {
+  			var style = document.createElement('style');
+			style.type = 'text/css';
+	//		style.innerHTML = '.cssColClass_' + i + ' {max-width: 50px;}';
+			document.getElementsByTagName('head')[0].appendChild(style);
+			this.CSS_COL_STYLE[i] = style;
+		}
+        
     },
     
     /**
@@ -154,9 +178,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 	    }
         
         tdPrototype.style.padding = this._defaultCellPadding;
+        tdPrototype.style.overflow = "hidden";
+        tdPrototype.style.textOverflow = "ellipsis";
+		
+        //tdPrototype.style.maxWidth = "50px";
     
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
+            td.className  = "cssColClass_" + columnIndex;            
             tr.appendChild(td);
             if (columnIndex == 0 && this._verticalLine) {
             	//draw the left-most vertical line
@@ -308,7 +337,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.Border.render(this.component.render("border"), this._div);
         Echo.Sync.Color.render(this.component.render("background"), this._div, "backgroundColor");
         Echo.Sync.FillImage.render(this.component.render("backgroundImage"), this._div);
-        Echo.Sync.Insets.render(this.component.render("margins"), this._div, "margin");
+        //Echo.Sync.Insets.render(this.component.render("margins"), this._div, "margin");
+        this._div.style.marginLeft = "auto";
+        this._div.style.marginRight = "auto";
+        
         if (this._height) {
    	        this._div.style.height = Echo.Sync.Extent.toCssValue(this._height, false, true);
 	    }
@@ -343,9 +375,13 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             this._div.appendChild(this._divHeader2);
             
         	this._tableHeader = document.createElement("table");
-        	this._tableHeader.style.width = "100%";
+        	 if (this._width) {
+	        	//this._tableHeader.style.width = "100%";
+	        }
         	this._tableHeader.style.height = "100%";
 			this._tableHeader.style.borderCollapse = "collapse";
+	        this._tableHeader.style.whiteSpace = "nowrap";  //TODO make configurable
+	        //this._tableHeader.style.tableLayout = "fixed";
 	        this._divHeader.appendChild(this._tableHeader);
 	        
 	        this._colGroupHeader = document.createElement("colgroup");
@@ -376,6 +412,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         this._table = document.createElement("table");
         this._table.style.borderSpacing = "0px";
+        this._table.style.whiteSpace = "nowrap";  //TODO make configurable
+        this._table.style.tableLayout = "fixed";  //needed so columns can get smaller than content
+        //this._table.style.width = "100%";
+        
         if (this._selectionEnabled) {
             this._table.style.cursor = "pointer";
         }
@@ -387,7 +427,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         if (this._width) {
             this._table.style.width = "100%";
-        }
+		}
         
         this._tbody = document.createElement("tbody");
         this._table.appendChild(this._tbody);
@@ -427,22 +467,12 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     /** @see Echo.Render.ComponentSync#renderDisplay */
     renderDisplay: function() {
     	var headerHeight = this._tableHeader.clientHeight;
-		if (!this._width) {
-			//if width is not set then adjust outer div accordingly
-			var actualTableWidth = this._table.clientWidth;
-    		this._div.style.width = (actualTableWidth) + "px";
-			if (this._tableHeader.clientWidth > this._divHeader.clientWidth) {
-				console.log(this._divHeader.clientWidth + "->" + this._tableHeader.clientWidth);
-				//header table is larger than body table -> increase size
-				this._div.style.width = this._tableHeader.clientWidth + "px";
-			}
-		}
+		
 		if (!this._height) {
 			//height is not set, so calculate it and adjust outer div accordingly
 			var actualTableHeight = this._table.clientHeight;
     		this._div.style.height = (headerHeight + actualTableHeight) + "px";
-		}
-		
+		}		
     	this._divHeader.style.height = headerHeight + "px";
     	this._divTable.style.top = headerHeight + "px";
 		var scroll = this._divTable.scrollHeight > this._divTable.clientHeight;
@@ -453,31 +483,18 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     	//sync header column widths with main table widths
 		var t0Row = this._tableHeader.rows[0];
     	var t1Row = this._table.rows[0];
-    	for (var i = 0; i < t1Row.cells.length; i++) {
-	    	this._colGroupHeader.children[i].style.width = t1Row.cells[i].offsetWidth + "px"; 
-		}
-
-		var deltaSum = 0;
-    	for (var i = 0; i < t1Row.cells.length; i++) {
-   		 	var w0 = t0Row.cells[i].offsetWidth;
-   		 	var w1 = t1Row.cells[i].offsetWidth;
-	 		if (w0 === 0) break;
-	 		var delta = w0 - w1;
-	 		if (delta > 0) {
-		 		//console.log(i + " --> " + (w0 - 14) + "px");
-		 		t1Row.cells[i].style.minWidth = (w0 - 14) + "px"; 
-	 		} else if (delta < -10) {
-		 		console.log(i + " -<< " + (w1) + "px: " + delta);
-		 		t0Row.cells[i].style.minWidth = (w1  - 14) + "px"; 
+    	if (!this._width) {
+	    	for (var i = 0; i < t1Row.cells.length; i++) {
+	    		var width = Math.max(t0Row.cells[i].offsetWidth, t1Row.cells[i].offsetWidth);
+			    this._colGroupHeader.children[i].style.width = width + "px";
+			    this._colGroupBody.children[i].style.width = width + "px";
 			}
-			deltaSum += delta;
-   		}
-   		
- //  		var newWidthTable = parseInt(this._table.offsetWidth); 
-//		this._table.style.width = (newWidthTable + delta)+ "px";
-//		this._tableHeader.style.width = (newWidthTable + delta) + "px";
-   		
-    	
+    	} else {
+	    	for (var i = 0; i < t1Row.cells.length; i++) {
+		    	this._colGroupHeader.children[i].style.width = t1Row.cells[i].offsetWidth + "px";
+			}
+		}
+			
     },
 
     /** @see Echo.Render.ComponentSync#renderDispose */
@@ -565,9 +582,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 		if (zebra) {
 			tr.style.background = zebra;
 		}
-		if (rowIndex === 0) {
-			tr.style.maxHeight = "0px";
-		}	
         
         var td = tr.firstChild;
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {        
@@ -656,12 +670,12 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             var colElement = document.createElement("col");
             width = this.component.renderIndex("columnWidth", i); 
             if (width == null) {
-            	colElement.style.width = (100 / this._columnCount) + "%";
+            	//colElement.style.width = (100 / this._columnCount) + "%";
             } else if (Echo.Sync.Extent.isPercent(width)) {
                 colElement.style.width = width.toString();
             } else {
                 var columnPixels = Echo.Sync.Extent.toPixels(width, true);
-                colElement.style.width = this._columnWidths[i] + "px";
+                colElement.style.width = columnPixels + "px";
             }
             colGroupElement.appendChild(colElement);
         }
@@ -792,6 +806,11 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onDown: function (e) {
+	
+	
+//		this._thisRef._table.style.width = "300px";
+	
+	
 		this._resizeGhost = document.getElementById("rrr");
 		this._startX = 0; 
 		this._initTableWidth = this.getColRatioWidth();
@@ -811,21 +830,50 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onUp: function (event) {
-	
 		var newWidth = parseInt(this._thisRef._colGroupHeader.children[this._col].style.width); 
 		newWidth += this._startX;
+    	var t0Row = this._thisRef._tableHeader.rows[0];
     	var t1Row = this._thisRef._table.rows[0];
-    	//set header and body column widths to pixel values
-    	for (var i = 0; i < t1Row.cells.length; i++) {
-    		var w = (i == this._col ? this._startX : 0) + t1Row.cells[i].offsetWidth
-	    	this._thisRef._colGroupHeader.children[i].style.width = w + "px";
-	    	this._thisRef._colGroupBody.children[i].style.width = w + "px";
-   		}
-		
-		var newWidthTable = parseInt(this._thisRef._table.offsetWidth); 
-		newWidthTable += this._startX;
-		this._thisRef._table.style.width = newWidthTable + "px";
-		this._thisRef._tableHeader.style.width = newWidthTable + "px";
+    	
+		var thisColWidth = parseFloat(this._thisRef._colGroupBody.children[this._col].style.width);
+    	var isPercent = true;
+    	switch (this._thisRef._resizePoliy) {
+		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PIXEL:
+			isPercent = false;
+		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PERCENT:
+			var nextColWidth = parseFloat(this._thisRef._colGroupBody.children[this._col + 1].style.width);
+			var deltaWidth = this._startX;
+			var unitSign = isPercent ? "%" : "px";
+			if (isPercent) {
+				//calculate the difference in percentage
+				deltaWidth = 100 / this._thisRef._table.offsetWidth * deltaWidth;  //TODO consider total width != 100%
+			}
+			if (deltaWidth > nextColWidth) {
+				//next column must not be less than 1%/1px
+				deltaWidth = nextColWidth - 1;
+			} else if (-deltaWidth > thisColWidth) {
+				//this column must not be less than 1%/1px
+				deltaWidth = -thisColWidth + 1;
+			}
+			//apply new percentages to body colgroup columns
+			this._thisRef._colGroupBody.children[this._col].style.width = (thisColWidth + deltaWidth) + unitSign;
+			this._thisRef._colGroupBody.children[this._col + 1].style.width= (nextColWidth - deltaWidth) + unitSign;
+			this._thisRef.renderDisplay();
+			break;
+		default:
+			var w = thisColWidth + this._startX;
+			//these special measures are needed to make the columns small than their content
+			//that is overflow = hidden
+			if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+				this._thisRef._table.style.width = "100%";
+			} else {
+				var t = ".cssColClass_" + this._col + " {max-width: " + (w - 16) + "px;}";
+				this._thisRef.CSS_COL_STYLE[this._col].innerHTML = t;
+			}
+
+			this._thisRef._colGroupHeader.children[this._col].style.width = w + "px";
+			this._thisRef._colGroupBody.children[this._col].style.width = w + "px";
+		}
 		this._resizeGhost.style.display = "none";
 	}
 });
