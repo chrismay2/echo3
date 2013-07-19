@@ -1,4 +1,3 @@
-
 /**
   Remote Table component.
  */
@@ -93,21 +92,19 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      */
 	_colGroupBody: null,
 	
-	_resizePoliy: 2,
+	_resizePolicy: 2, //_RESIZE_TABLE_WIDTH
     
     /** Constructor. */
     $construct: function() {
         this.selectionModel = null;
         this.lastSelectedIndex = null;
-        
+        //TODO only needed for Chrome
        	for (var i = 0; i < 4; i++) {
   			var style = document.createElement('style');
 			style.type = 'text/css';
-	//		style.innerHTML = '.cssColClass_' + i + ' {max-width: 50px;}';
 			document.getElementsByTagName('head')[0].appendChild(style);
 			this.CSS_COL_STYLE[i] = style;
 		}
-        
     },
     
     /**
@@ -163,7 +160,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     _createRowPrototype: function(isHeader) {
         var tr = document.createElement("tr");
     
-        var tdPrototype = document.createElement(isHeader ? "th" : "td");
+        var tdPrototype = document.createElement(isHeader ? "td" : "td");
         if (this._verticalLine) {
 	        tdPrototype.style.borderRight = this._verticalLine;
 	    }
@@ -180,8 +177,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         tdPrototype.style.padding = this._defaultCellPadding;
         tdPrototype.style.overflow = "hidden";
         tdPrototype.style.textOverflow = "ellipsis";
-		
-        //tdPrototype.style.maxWidth = "50px";
     
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
@@ -337,15 +332,18 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         Echo.Sync.Border.render(this.component.render("border"), this._div);
         Echo.Sync.Color.render(this.component.render("background"), this._div, "backgroundColor");
         Echo.Sync.FillImage.render(this.component.render("backgroundImage"), this._div);
-        //Echo.Sync.Insets.render(this.component.render("margins"), this._div, "margin");
-        this._div.style.marginLeft = "auto";
-        this._div.style.marginRight = "auto";
+        Echo.Sync.Insets.render(this.component.render("margins"), this._div, "margin");
         
         if (this._height) {
    	        this._div.style.height = Echo.Sync.Extent.toCssValue(this._height, false, true);
 	    }
         if (this._width) {
             this._div.style.width = Echo.Sync.Extent.toCssValue(this._width, true, true);
+			if (Echo.Sync.Extent.isPercent(this._width)) {
+				this._resizePolicy = Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PERCENT;
+			} else {
+				this._resizePolicy = Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PIXEL;
+			}
    		}     
         this._div.style.textAlign = "left";
         parentElement.appendChild(this._div);
@@ -375,13 +373,13 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             this._div.appendChild(this._divHeader2);
             
         	this._tableHeader = document.createElement("table");
-        	 if (this._width) {
-	        	//this._tableHeader.style.width = "100%";
+        	if (this._width) {
+	        	this._tableHeader.style.width = "100%";
 	        }
         	this._tableHeader.style.height = "100%";
 			this._tableHeader.style.borderCollapse = "collapse";
 	        this._tableHeader.style.whiteSpace = "nowrap";  //TODO make configurable
-	        //this._tableHeader.style.tableLayout = "fixed";
+	        this._tableHeader.style.tableLayout = "fixed";
 	        this._divHeader.appendChild(this._tableHeader);
 	        
 	        this._colGroupHeader = document.createElement("colgroup");
@@ -414,7 +412,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._table.style.borderSpacing = "0px";
         this._table.style.whiteSpace = "nowrap";  //TODO make configurable
         this._table.style.tableLayout = "fixed";  //needed so columns can get smaller than content
-        //this._table.style.width = "100%";
         
         if (this._selectionEnabled) {
             this._table.style.cursor = "pointer";
@@ -578,7 +575,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      * @type Element
      */
     _renderRow: function(update, rowIndex, trPrototype, zebra) {
-        var tr = trPrototype ? trPrototype.cloneNode(true) : this._createRowPrototype(false);
+        var tr = trPrototype.cloneNode(true);
 		if (zebra) {
 			tr.style.background = zebra;
 		}
@@ -830,42 +827,43 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onUp: function (event) {
-		var newWidth = parseInt(this._thisRef._colGroupHeader.children[this._col].style.width); 
-		newWidth += this._startX;
+		var thisColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col].style.width);
+		var newWidth = thisColWidth + this._startX;
     	var t0Row = this._thisRef._tableHeader.rows[0];
     	var t1Row = this._thisRef._table.rows[0];
     	
-		var thisColWidth = parseFloat(this._thisRef._colGroupBody.children[this._col].style.width);
     	var isPercent = true;
-    	switch (this._thisRef._resizePoliy) {
+    	switch (this._thisRef._resizePolicy) {
 		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PIXEL:
 			isPercent = false;
 		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PERCENT:
-			var nextColWidth = parseFloat(this._thisRef._colGroupBody.children[this._col + 1].style.width);
+			var nextColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col + 1].style.width);
 			var deltaWidth = this._startX;
+			if (nextColWidth - deltaWidth < 13) {
+				//next column must not be less than 13px
+				deltaWidth = nextColWidth - 13;
+			} else if (thisColWidth + deltaWidth < 13) {
+				//this column must not be less than 13px				
+				deltaWidth = 13 - thisColWidth;
+			}
 			var unitSign = isPercent ? "%" : "px";
 			if (isPercent) {
 				//calculate the difference in percentage
 				deltaWidth = 100 / this._thisRef._table.offsetWidth * deltaWidth;  //TODO consider total width != 100%
 			}
-			if (deltaWidth > nextColWidth) {
-				//next column must not be less than 1%/1px
-				deltaWidth = nextColWidth - 1;
-			} else if (-deltaWidth > thisColWidth) {
-				//this column must not be less than 1%/1px
-				deltaWidth = -thisColWidth + 1;
-			}
-			//apply new percentages to body colgroup columns
+			
 			this._thisRef._colGroupBody.children[this._col].style.width = (thisColWidth + deltaWidth) + unitSign;
 			this._thisRef._colGroupBody.children[this._col + 1].style.width= (nextColWidth - deltaWidth) + unitSign;
 			this._thisRef.renderDisplay();
 			break;
 		default:
 			var w = thisColWidth + this._startX;
-			//these special measures are needed to make the columns small than their content
-			//that is overflow = hidden
+			//respect minimum size
+			if (w < 16) w = 16;
+			//these special measures are needed to make the columns smaller than their actual content
 			if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
 				this._thisRef._table.style.width = "100%";
+				this._thisRef._tableHeader.style.width = "100%";
 			} else {
 				var t = ".cssColClass_" + this._col + " {max-width: " + (w - 16) + "px;}";
 				this._thisRef.CSS_COL_STYLE[this._col].innerHTML = t;

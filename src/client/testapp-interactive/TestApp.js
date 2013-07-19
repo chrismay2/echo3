@@ -694,10 +694,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 //		splitPane.add(splitPane2);
 //		splitPane2.add(new Echo.Label());
 		
-		var col = new Echo.Row({background: "#a4f4f4"});
+		var col = new Echo.Row({});
 		this.content.add(col);
-		
-		
 		
 		var childrenTexts = [
 			"Employee", "Net Salary", "Bonus", "Supervisor",
@@ -707,10 +705,13 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 			"James Albert Pentel", "$175", "$25", "Annie"];
 
 		var children = [];
-		//children[0] = new Echo.CheckBox({text: childrenTexts[0], border: "1px solid #665566", icon: "img/test.png"});
 		
 		for (var i = 0; i < childrenTexts.length; i++) {
-			children[i] = new Echo.Label({text: childrenTexts[i]});
+			if (i === 12) {
+				children[i] = new Echo.CheckBox({text: childrenTexts[i], border: "1px solid #665566", icon: "img/test.png"});
+			} else  {
+				children[i] = new Echo.Label({text: childrenTexts[i]});
+			}
 		}
 		
 		if (this._chkBigData.get("selected")) {
@@ -722,7 +723,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	var attr = {
 		    columnCount: 4,
 		    rowCount: children.length / 4 ,
-		   // width: "550px",
+		    width: "550px",
 		    height: "280px",
 		    selection: "2",
 		    margins: "15px 15px",		
