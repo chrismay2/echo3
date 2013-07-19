@@ -52,11 +52,21 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
          */
         _HEADER_ROW: -1,
 
+		/**
+		 *
+		 */ 
         _RESIZE_COLGROUP_PIXEL: 0,
+        
+        /**
+		 *
+		 */
         _RESIZE_COLGROUP_PERCENT: 1,
         
         /**
-         * This is the case when no width is set, and the table is sized according to its content
+         * Table width is null, the table automatically takes the spaces it needs 
+         * (as calculated by the browser)
+         * When the user resizes a column the table width changes accordingly,
+         * the other columns remain unchanged
          */	
         _RESIZE_TABLE_WIDTH: 2,
         
@@ -160,18 +170,19 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     _createRowPrototype: function(isHeader) {
         var tr = document.createElement("tr");
     
-        var tdPrototype = document.createElement(isHeader ? "td" : "td");
-        if (this._verticalLine) {
-	        tdPrototype.style.borderRight = this._verticalLine;
-	    }
-        if (!isHeader && this._horizontalLine) {
-	        tdPrototype.style.borderBottom = this._horizontalLine;
-	    }
+        var tdPrototype = document.createElement(isHeader ? "th" : "td");
 	    if (isHeader) {
 	    	//this is needed for the absolute positioning
 	    	//of the resizeHandle (display:inline does not work in IE8)
 			tdPrototype.style.position = "relative";
 			tdPrototype.style.textAlign = "left";
+	    } else {
+	        //if (this._verticalLine) {
+		        tdPrototype.style.borderRight = this._verticalLine;
+		    //}
+	        //if (this._horizontalLine) {
+		        tdPrototype.style.borderBottom = this._horizontalLine;
+		    //}
 	    }
         
         tdPrototype.style.padding = this._defaultCellPadding;
@@ -181,26 +192,20 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
             td.className  = "cssColClass_" + columnIndex;            
-            tr.appendChild(td);
             if (columnIndex == 0 && this._verticalLine) {
             	//draw the left-most vertical line
             	td.style.borderLeft = this._verticalLine;
             }
+            tr.appendChild(td);
+
             if (isHeader) {
-            	//the (invisible) resize handle attached at the right
-            	//side of every header cell
-            	var resizeHandle = document.createElement("span");
-            	resizeHandle.style.background = "#7777aa";
-            	resizeHandle.style.position = "absolute";
-            	resizeHandle.style.cursor = "col-resize";
-            	resizeHandle.style.float = "right";
-            	resizeHandle.style.height = "100%";
-            	resizeHandle.style.width = "6px";
-            	resizeHandle.style.right = "-4px";
-            	resizeHandle.style.marginTop = "-8px";
-            	resizeHandle.style.zIndex = "10000";
-            	td.appendChild(resizeHandle);
-            }
+				td = document.createElement("td");
+            	//td.style.background = "#ee00aa";
+            	td.style.cursor = "col-resize";
+            	td.style.padding = "0px";
+		        td.style.borderRight = this._verticalLine;
+            	tr.appendChild(td);
+	        }            
         }
         return tr;
     },
@@ -263,9 +268,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             this.lastSelectedIndex = rowIndex;
             this._setSelected(rowIndex, !this.selectionModel.isSelectedIndex(rowIndex));
         }
-        
         this.component.set("selection", this.selectionModel.getSelectionString());
-        
         this.component.doAction();
     },
     
@@ -383,7 +386,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 	        this._divHeader.appendChild(this._tableHeader);
 	        
 	        this._colGroupHeader = document.createElement("colgroup");
-	        for (var i = 0; i < this._columnCount; ++i) {
+	        for (var i = 0; i < this._columnCount * 2; ++i) {
 	            this._colGroupHeader.appendChild(document.createElement("col"));
 	        }
 	        this._tableHeader.appendChild(this._colGroupHeader);
@@ -480,15 +483,17 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     	//sync header column widths with main table widths
 		var t0Row = this._tableHeader.rows[0];
     	var t1Row = this._table.rows[0];
-    	if (!this._width) {
+    	if (this._width) {
 	    	for (var i = 0; i < t1Row.cells.length; i++) {
-	    		var width = Math.max(t0Row.cells[i].offsetWidth, t1Row.cells[i].offsetWidth);
-			    this._colGroupHeader.children[i].style.width = width + "px";
-			    this._colGroupBody.children[i].style.width = width + "px";
+	    		var redux = i == 0 ? 9 : 6; 
+		    	this._colGroupHeader.children[i * 2].style.width = (t1Row.cells[i].offsetWidth - redux) + "px";
+		    	this._colGroupHeader.children[i * 2 + 1].style.width = "6px";
 			}
     	} else {
 	    	for (var i = 0; i < t1Row.cells.length; i++) {
-		    	this._colGroupHeader.children[i].style.width = t1Row.cells[i].offsetWidth + "px";
+	    		var width = Math.max(t0Row.cells[i].offsetWidth, t1Row.cells[i].offsetWidth);
+			    this._colGroupHeader.children[i * 2].style.width = width + "px";
+			    this._colGroupBody.children[i].style.width = width + "px";
 			}
 		}
 			
@@ -582,12 +587,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         var td = tr.firstChild;
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {        
-        	if (this._headerVisible && rowIndex === -1) {
-	 	       	var resizeHandle = td.firstChild;
-        		var resizeListener = new ColumnResizeListener(columnIndex, resizeHandle, this);
-				resizeListener.addMoveListener(resizeHandle);   
-			}        
-        
             var child = this.component.getComponent((rowIndex + (this._headerVisible ? 1 : 0)) * this._columnCount + columnIndex);
             if (!child) break;  //XXX
             var layoutData = child.render("layoutData");            
@@ -600,6 +599,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     
             Echo.Render.renderComponentAdd(update, child, td);
             td = td.nextSibling;
+            if (rowIndex === -1) {
+               	var resizeListener = new ColumnResizeListener(columnIndex, td, this);
+				resizeListener.addMoveListener(td); 
+            	td = td.nextSibling;
+            }
         }
         return tr;
     },
@@ -803,18 +807,13 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onDown: function (e) {
-	
-	
-//		this._thisRef._table.style.width = "300px";
-	
-	
 		this._resizeGhost = document.getElementById("rrr");
 		this._startX = 0; 
 		this._initTableWidth = this.getColRatioWidth();
 		
 		var t1Row = this._thisRef._tableHeader.rows[0];
-		this._offset = -3;
-		for(var i = 0; i <= this._col; i++){
+		this._offset = 0;
+		for(var i = 0; i <= this._col * 2; i++){
     		this._offset += t1Row.cells[i].offsetWidth;
     	}
 		this._resizeGhost.style.display = "block";
@@ -827,18 +826,18 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	},
 	
 	onUp: function (event) {
-		var thisColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col].style.width);
+		var thisColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col * 2].style.width) + 6;
 		var newWidth = thisColWidth + this._startX;
     	var t0Row = this._thisRef._tableHeader.rows[0];
     	var t1Row = this._thisRef._table.rows[0];
+    	var deltaWidth = this._startX;
     	
     	var isPercent = true;
     	switch (this._thisRef._resizePolicy) {
 		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PIXEL:
 			isPercent = false;
 		case Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PERCENT:
-			var nextColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col + 1].style.width);
-			var deltaWidth = this._startX;
+			var nextColWidth = parseFloat(this._thisRef._colGroupHeader.children[this._col * 2 + 2].style.width) + 6;
 			if (nextColWidth - deltaWidth < 13) {
 				//next column must not be less than 13px
 				deltaWidth = nextColWidth - 13;
@@ -854,10 +853,17 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 			
 			this._thisRef._colGroupBody.children[this._col].style.width = (thisColWidth + deltaWidth) + unitSign;
 			this._thisRef._colGroupBody.children[this._col + 1].style.width= (nextColWidth - deltaWidth) + unitSign;
+			
+			for (var i = 0; i < 4; i++) {
+				if (!this._thisRef._colGroupBody.children[i].style.width) {
+					this._thisRef._colGroupBody.children[i].style.width = t1Row.cells[i].offsetWidth + "px";
+					console.log(i + ":  " + this._thisRef._colGroupBody.children[i].style.width);
+				}			
+			}
 			this._thisRef.renderDisplay();
 			break;
 		default:
-			var w = thisColWidth + this._startX;
+			var w = thisColWidth + deltaWidth;
 			//respect minimum size
 			if (w < 16) w = 16;
 			//these special measures are needed to make the columns smaller than their actual content
@@ -869,7 +875,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 				this._thisRef.CSS_COL_STYLE[this._col].innerHTML = t;
 			}
 
-			this._thisRef._colGroupHeader.children[this._col].style.width = w + "px";
+			this._thisRef._colGroupHeader.children[this._col * 2].style.width = w + "px";
 			this._thisRef._colGroupBody.children[this._col].style.width = w + "px";
 		}
 		this._resizeGhost.style.display = "none";
