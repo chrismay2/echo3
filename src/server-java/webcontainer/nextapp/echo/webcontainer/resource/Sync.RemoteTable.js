@@ -373,6 +373,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         	//this._divHeader2.style.height = "24px";
       	    Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader2, "backgroundColor");
       	    Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader2, "backgroundColor");
+      	    if (separatorLine) {
+			    this._divHeader2.style.borderBottom = separatorLine;
+		    }
             this._div.appendChild(this._divHeader2);
             
         	this._tableHeader = document.createElement("table");
@@ -397,8 +400,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
 		//create body div element
         this._divTable = document.createElement("div");
-        this._divTable.style.position = "absolute";       
-       
+        this._divTable.style.position = "absolute";
         this._divTable.style.bottom = "0px";
         this._divTable.style.left = "0px";
         this._divTable.style.right = "0px";
@@ -474,7 +476,12 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     		this._div.style.height = (headerHeight + actualTableHeight) + "px";
 		}		
     	this._divHeader.style.height = headerHeight + "px";
-    	this._divTable.style.top = headerHeight + "px";
+    	
+    	var separatorHeight = this._divHeader.style.borderBottomWidth;
+    	if (separatorHeight) {
+    		headerHeight += parseInt(separatorHeight); 
+    	}
+    	this._divTable.style.top = headerHeight  + "px";
 		var scroll = this._divTable.scrollHeight > this._divTable.clientHeight;
     	this._divHeader.style.marginRight = scroll ? "17px" : "0px";
     	

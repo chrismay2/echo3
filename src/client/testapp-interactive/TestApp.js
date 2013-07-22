@@ -661,9 +661,9 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
         this.addTestButton("Zebra", function() {
         	that._showTable("zebra");
     	});
-        this.addTestButton("One Column Emphasis", function() {
-        	that._showTable("one_column_emphasis");
-    	});	
+        this.addTestButton("Horizontal Emphasis", function() {
+        	that._showTable("horizontal_emphasis");
+    	});
         this.addTestButton("Rounded Corner", function() {
         	that._showTable("rounded_corner");
     	});	
@@ -754,13 +754,15 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	} else if (style === "zebra") {
 		    attr.insets = "10px 5px";
 		    attr.zebraBackground = "#E8EDFF";
-	 	} else if (style === "one_column_emphasis") {
+	 	} else if (style === "horizontal_emphasis") {
 		    attr.insets = "10px 5px";
 		    attr.foreground = "#555555";
-		    attr.headerForeground = "#555555";
-		    attr.rolloverBackground = "#EFF2FF";
+		    attr.rolloverBackground = "#ffffff";
+		    attr.rolloverForeground = "#770077";
+		    attr.background = "#f3f3f3";
 		    attr.rolloverEnabled = true;
-		    attr.horizontalLine = "1px solid #E8EDFF";
+		    attr.separatorLine = "6px solid #ffffff";
+		    attr.horizontalLine = "4px solid #ffffff";
 	 	} else if (style === "rounded_corner") {
 		    attr.background = "#E8EDFF";
 		    attr.headerBackground = "#B9C9FE";
@@ -776,6 +778,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.foreground = "gray";
 		    attr.background = "#f4f4f4";
 		    attr.headerForeground = "gray";
+			attr.boxShadow = "3px 3px 12px 2px black";
 	 	} else if (style === "xxxx") {
 	 	 	//"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
 		    attr.boxShadow = "3px 3px 12px 2px black";
