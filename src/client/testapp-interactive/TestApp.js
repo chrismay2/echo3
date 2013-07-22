@@ -433,10 +433,10 @@ TestApp.Tests.WindowPane = Core.extend(TestApp.TestPane, {
     }
 });
 
-TestApp.Tests.ButtonAlignment = Core.extend(Echo.Column, {
+TestApp.Tests.ButtonAlignment = Core.extend(TestApp.TestPane, {
 
     $construct: function() {
-        Echo.Column.call(this);
+        TestApp.TestPane.call(this);
 
         var middlealign = {horizontal: "center", vertical: "middle"};
         var rightalign = {horizontal: "right", vertical: "middle"};
@@ -623,13 +623,13 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
 		var select = new Echo.SelectField(attributes);
         this.add(select);
         
-        var bla = function() {
+        var doAction = function() {
         	var value = select.render("selectedId", 1);
         	value++;
         	if (value > 3) value = 1;
 	        select.set("selectedId", value);
         };
-        attributes.events = {action: bla};
+        attributes.events = {action: doAction};
         attributes.boxShadow = "3px 3px 12px 2px black";
         this.add(new Echo.SelectField(attributes));
         
@@ -641,61 +641,106 @@ TestApp.Tests.List = Core.extend(Echo.Grid, {
 TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 
 	_chkBigData: null, 
+	_chkHeader: null,
+	_cboStyle: null,
+	_cboWidth: null,
+	_cboCols: null,
 
     $construct: function() {
         TestApp.TestPane.call(this);
 
 		var that = this;
-		this._chkBigData = new Echo.CheckBox({selected: true, text: "Big data", insets: "5px"});
-	    this.controlsColumn.add(this._chkBigData);
+
+        var doAction = function(e) {
+        	that._showTable();
+        };
+
+		var a = {selected: true, text: "Big data", events: {action: doAction}};
 		
-        this.addTestButton("Default", function() {
-        	that._showTable("default");
-    	});
-        this.addTestButton("Horizontal Minimalist", function() {
-        	that._showTable("horizontal_minimalist");
-    	});
-        this.addTestButton("Box", function() {
-        	that._showTable("box");
-    	});
-        this.addTestButton("Zebra", function() {
-        	that._showTable("zebra");
-    	});
-        this.addTestButton("Horizontal Emphasis", function() {
-        	that._showTable("horizontal_emphasis");
-    	});
-        this.addTestButton("Rounded Corner", function() {
-        	that._showTable("rounded_corner");
-    	});	
-        this.addTestButton("Verticals Bars", function() {
-        	that._showTable("verticals");
-    	});	
-    	
-    	this._showTable("verticals");
+		this._chkBigData = new Echo.CheckBox(a);
+	    this.controlsColumn.add(this._chkBigData);
+
+		this._chkHeader = new Echo.CheckBox({selected: true, text: "Header", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkHeader);
+
+		this._chkMargins = new Echo.CheckBox({selected: true, text: "Margins", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkMargins);
+	    
+	    var cboStyleAttr = {};
+	    cboStyleAttr.items = [
+	    	{text: "Default", id: "default"}, 
+	    	{text: "Horizontal Minimalist", id: "horizontal_minimalist"}, 
+	    	{text: "Box", id: "box"}, 
+	    	{text: "Zebra", id: "zebra"}, 
+	    	{text: "Horizontal Emphasis", id: "horizontal_emphasis"}, 
+	    	{text: "Rounded Corner", id: "rounded_corner"}, 
+	    	{text: "Verticals Bars", id: "verticals"}];
+	 	cboStyleAttr.selectedId = "verticals";
+        cboStyleAttr.events = {action: doAction};
+        this.controlsColumn.add(this._cboStyle = new Echo.SelectField(cboStyleAttr));
+        
+	    var cboWidthAttr = {};
+	    cboWidthAttr.items = [
+	    	{text: "Width = 500px", id: "500px"}, 
+	    	{text: "Width = 100%", id: "100pc"}, 
+	    	{text: "Width = null", id: "null"}];
+	    cboWidthAttr.selectedId = "500px";	
+        cboWidthAttr.events = {action: doAction};
+        this.controlsColumn.add(this._cboWidth = new Echo.SelectField(cboWidthAttr));
+
+	    var cboColsAttr = {};
+	    cboColsAttr.items = [
+	    	{text: "Columns = 20/40/40/20%", id: "percent"},
+	    	{text: "Columns = 100/100/300/100px", id: "pixel"}, 
+	    	{text: "Columns = null", id: "null"}];
+	    cboColsAttr.selectedId = "percent";		
+        cboColsAttr.events = {action: doAction};
+        this.controlsColumn.add(this._cboCols = new Echo.SelectField(cboColsAttr));
+
+    	this._showTable();
      },
 
-	 _showTable: function(style) {
+	 _showTable: function() {
 
         while (this.content.children.length > 0) {
 	        this.content.remove(0);
 	    }
 
-		var splitPane = new Echo.SplitPane({
-			orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
-			resizable: true
-		});
-//		this.content.add(splitPane);
-		
-		var splitPane2 = new Echo.SplitPane({
-			orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
-			resizable: true,
-			separatorPosition: "0px"
-		});
-//		splitPane.add(splitPane2);
-//		splitPane2.add(new Echo.Label());
-		
-		var col = new Echo.Row({});
-		this.content.add(col);
+		var tableContainer = null;
+		var tableWidth = null;
+		switch (this._cboWidth.get("selectedId")) {
+		case "100pc":
+			tableWidth = "100%";
+			var splitPane = new Echo.SplitPane({
+				orientation: Echo.SplitPane.ORIENTATION_VERTICAL_TOP_BOTTOM,
+				resizable: true
+			});
+			this.content.add(splitPane);
+			var tableContainer = new Echo.SplitPane({
+				orientation: Echo.SplitPane.ORIENTATION_HORIZONTAL_RIGHT_LEFT,
+				resizable: true,
+				separatorPosition: "50px"
+			});
+			splitPane.add(tableContainer);
+			tableContainer.add(new Echo.Label());
+			break;
+		case "500px":
+			tableWidth = "500px";
+		default:
+			var tableContainer = new Echo.Row({});
+			this.content.add(tableContainer);
+			break;
+		}
+
+		var columnWidths = null;
+		switch (this._cboCols.get("selectedId")) {
+		case "pixel":
+			columnWidths =  ["100px", "100px", "300px", "100px"];
+			break;
+		case "percent":
+			columnWidths =  ["20%", "40%", "40%", "20%"];
+			break;
+		}
 		
 		var childrenTexts = [
 			"Employee", "Net Salary", "Bonus", "Supervisor",
@@ -703,9 +748,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 			"Josephin Tan", "$150", "-", "Annie",
 			"Joyce Ming", "$200", "$35", "Andy",
 			"James Albert Pentel", "$175", "$25", "Annie"];
-
 		var children = [];
-		
 		for (var i = 0; i < childrenTexts.length; i++) {
 			if (i === 12) {
 				children[i] = new Echo.CheckBox({text: childrenTexts[i], border: "1px solid #665566", icon: "img/test.png"});
@@ -713,7 +756,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 				children[i] = new Echo.Label({text: childrenTexts[i]});
 			}
 		}
-		
 		if (this._chkBigData.get("selected")) {
 			for (var j = 0; j < 200; j++) {
 				children[j +20] = new Echo.Label({text: "Data_" + j});
@@ -723,16 +765,17 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	var attr = {
 		    columnCount: 4,
 		    rowCount: children.length / 4 ,
-		    width: "550px",
+		    width: tableWidth,
 		    height: "280px",
 		    selection: "2",
-		    margins: "15px 15px",		
-		   // columnWidth: ["20px", "100px", "20px", "100px"],
-		    //columnWidth: ["20%", "30%", "25%", "25%"],    
+		    margins: this._chkMargins.get("selected") ? "15px" : null,
+			columnWidth: columnWidths,
+			headerVisible: this._chkHeader.get("selected"),			
 			children: children
 		}
 		this.content.set("background", "#ffffff");
 		
+		var style = this._cboStyle.get("selectedId");
 	 	if (style === "default") {
 	 		//nothing!
 	 	} else if (style === "horizontal_minimalist") {
@@ -799,6 +842,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		//   headerVisible: false,
 		
 	 	var table = new Echo.Sync.RemoteTable(attr);
-	    col.add(table);
+	    tableContainer.add(table);
 	 }
 });
