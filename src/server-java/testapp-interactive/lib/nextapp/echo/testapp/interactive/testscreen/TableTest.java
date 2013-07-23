@@ -508,6 +508,11 @@ public class TableTest extends SplitPane {
                 testTable.setBackground(StyleUtil.randomColor());
             }
         });
+        controlsColumn.addButton("Change Zebra background", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setZebraBackground(StyleUtil.randomColor());
+            }
+        });
         controlsColumn.addButton("Change Border (All Attributes)", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 testTable.setBorder(StyleUtil.randomBorder());

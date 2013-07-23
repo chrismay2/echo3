@@ -72,6 +72,7 @@ public class Table extends BorderedComponent {
     public static final TableCellRenderer DEFAULT_TABLE_CELL_RENDERER = new DefaultTableCellRenderer();
 
     public static final String PROPERTY_ACTION_COMMAND = "actionCommand";
+    public static final String PROPERTY_HEIGHT = "height";
     public static final String PROPERTY_INSETS = "insets";
     public static final String PROPERTY_ROLLOVER_BACKGROUND = "rolloverBackground";
     public static final String PROPERTY_ROLLOVER_BACKGROUND_IMAGE = "rolloverBackgroundImage";
@@ -84,8 +85,11 @@ public class Table extends BorderedComponent {
     public static final String PROPERTY_SELECTION_FONT = "selectionFont";
     public static final String PROPERTY_SELECTION_FOREGROUND= "selectionForeground";
     public static final String PROPERTY_WIDTH = "width";
-    //background
-    //height
+    public static final String PROPERTY_ZEBRA_BACKGROUND = "zebraBackground";
+    
+    //
+    //verticalLine
+    //horizontalLine
     
     public static final String INPUT_ACTION = "action";
 
@@ -417,7 +421,19 @@ public class Table extends BorderedComponent {
     public TableCellRenderer getDefaultRenderer(Class columnClass) {
         return (TableCellRenderer) defaultRendererMap.get(columnClass);
     }
+
+    /**
+     * Returns the overall height of the grid.
+     * This property supports <code>Extent</code>s with
+     * fixed or percentile units.
+     * 
+     * @return the height
+     */
+    public Extent getHeight() {
+        return (Extent) get(PROPERTY_HEIGHT);
+    }
     
+
     /**
      * Returns the default cell insets.
      * 
@@ -732,6 +748,19 @@ public class Table extends BorderedComponent {
     }
     
     /**
+     * Sets the overall height of the grid.
+     * This property supports <code>Extent</code>s with
+     * fixed or percentile units.
+     * If the height is null then the table expands automatically
+     * to the height of its content
+     * 
+     * @param newValue the new height
+     */
+    public void setHeight(Extent newValue) {
+        set(PROPERTY_HEIGHT, newValue);
+    }
+    
+    /**
      * Sets the default cell insets.
      * 
      * @param newValue the new default cell insets
@@ -903,13 +932,24 @@ public class Table extends BorderedComponent {
      * Sets the overall width of the grid.
      * This property supports <code>Extent</code>s with
      * fixed or percentile units.
+     * If the width is null then the table expands automatically
+     * to the width of its content (as calculated by the browser)
      * 
      * @param newValue the new width
      */
     public void setWidth(Extent newValue) {
         set(PROPERTY_WIDTH, newValue);
     }
-    
+
+    /**
+     * Set the background color of every 2nd row
+     * 
+     * @param newValue The background color of every 2nd row
+     */
+    public void setZebraBackground(Color newValue) {
+        set(PROPERTY_ZEBRA_BACKGROUND, newValue);
+    }
+
     /**
      * @see nextapp.echo.app.Component#validate()
      */

@@ -78,6 +78,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
     },
 
+	/**
+	 * workaround for chrome for setting column 
+	  * widths smaller than content
+	 */	
     CSS_COL_STYLE: [],
        
     
@@ -330,7 +334,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._div.id = this.component.renderId;
         this._div.style.position = "relative";
         this._div.style.overflow = "hidden";
-        this._div.style.boxSizing = "border-box";
         Echo.Sync.RoundedCorner.render(this.component.render("radius"), this._div);
         Echo.Sync.BoxShadow.render(this.component.render("boxShadow"), this._div);
         Echo.Sync.Border.render(this.component.render("border"), this._div);
@@ -485,13 +488,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     	if (this._headerVisible) {
 	    	headerHeight = this._tableHeader.clientHeight;
     	}
-		
 		if (!this._height) {
 			//height is not set, so calculate it and adjust outer div accordingly
 			var actualTableHeight = this._table.clientHeight;
     		this._div.style.height = (headerHeight + actualTableHeight) + "px";
 		}		
-    	var t1Row = this._table.rows[0];
 		if (!this._headerVisible) {
 			return;
 		}
@@ -503,13 +504,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
     		headerHeight += parseInt(separatorHeight); 
     	}
     	this._divTable.style.top = headerHeight  + "px";
-		var scroll = this._divTable.scrollHeight > this._divTable.clientHeight;
-    	this._divHeader.style.marginRight = scroll ? "17px" : "0px";
+		var scrollVisible = this._divTable.scrollHeight > this._divTable.clientHeight;
+    	this._divHeader.style.marginRight = scrollVisible ? "17px" : "0px";
     	
     	if (this._table.rows.length === 0) return;
     	
     	//sync header column widths with main table widths
 		var t0Row = this._tableHeader.rows[0];
+    	var t1Row = this._table.rows[0];
     	if (this._width) {
 	    	for (var i = 0; i < t1Row.cells.length; i++) {
 	    		var redux = i == 0 ? 9 : 6; 
@@ -517,10 +519,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 		    	this._colGroupHeader.children[i * 2 + 1].style.width = "6px";
 			}
     	} else {
+    		//no width set
 	    	for (var i = 0; i < t1Row.cells.length; i++) {
 	    		var width = Math.max(t0Row.cells[i].offsetWidth, t1Row.cells[i].offsetWidth);
 			    this._colGroupHeader.children[i * 2].style.width = width + "px";
 			    this._colGroupBody.children[i].style.width = width + "px";
+			   // t0Row.cells[i * 2].style.minWidth = (width - 6)+ "px";
+			   // t0Row.cells[i * 2 + 1].style.minWidth = "6px";
+			   //t1Row.cells[i].style.minWidth = width + "px";
 			}
 		}
 			
@@ -810,6 +816,8 @@ Echo.Sync.RemoteTable.ListSelectionModel = Core.extend({
     }    
 });
 
+
+
 ColumnResizeListener = Core.extend(Echo.MouseListener, {
 
     $construct: function(col, resizeHandle, thisRef) {
@@ -817,7 +825,6 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
      	this._mainDiv = thisRef._div;
      	this._thisRef = thisRef;
      	this._resizeHandle = resizeHandle;
-		//this._resizeGhost = thisRef._resizeGhost;
     },
 
 	_startX : 0, 
@@ -898,7 +905,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 				this._thisRef._table.style.width = "100%";
 				this._thisRef._tableHeader.style.width = "100%";
 			} else {
-				var t = ".cssColClass_" + this._col + " {max-width: " + (w - 16) + "px;}";
+				var t = ".cssColClass_" + this._col + " {min-width: " + (w - 16) + "px;max-width: " + (w - 16) + "px;}";
 				this._thisRef.CSS_COL_STYLE[this._col].innerHTML = t;
 			}
 

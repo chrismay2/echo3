@@ -58,7 +58,7 @@ Core = {
      * <p>
      * <ul>
      * <li>The <code>$construct</code> property, which must be a function, will be used as the constructor.
-     * The <code>$load</code> property, which must be a function, f provided, will be used as a static initializer,
+     * The <code>$load</code> property, which must be a function, if provided, will be used as a static initializer,
      * executed once when the class is *defined*.  The this pointer will be set to the class when
      * this method is executed.</li>
      * <li>The <code>$static</code> property, an object, if provided, will have its properties installed as class variables.</li>
@@ -96,7 +96,7 @@ Core = {
         // Perform argument error checking.
         if (arguments.length == 2) {
             if (typeof(baseClass) != "function") {
-                throw new Error("Base class is not a function, cannot derive.");
+                throw new Error("Base class '" + baseClass + "' is '" + typeof(baseClass) + "' and not a function, cannot derive.");
             }
         }
         if (!definition) {

@@ -645,6 +645,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	_cboStyle: null,
 	_cboWidth: null,
 	_cboCols: null,
+	_chkRadius: null,
+	_chkShadow: null,
 
     $construct: function() {
         TestApp.TestPane.call(this);
@@ -665,6 +667,12 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 
 		this._chkMargins = new Echo.CheckBox({selected: true, text: "Margins", events: {action: doAction}});
 	    this.controlsColumn.add(this._chkMargins);
+
+		this._chkRadius = new Echo.CheckBox({selected: false, text: "Radius", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkRadius);
+
+		this._chkShadow = new Echo.CheckBox({selected: false, text: "Box Shadow", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkShadow);
 	    
 	    var cboStyleAttr = {};
 	    cboStyleAttr.items = [
@@ -673,7 +681,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	    	{text: "Box", id: "box"}, 
 	    	{text: "Zebra", id: "zebra"}, 
 	    	{text: "Horizontal Emphasis", id: "horizontal_emphasis"}, 
-	    	{text: "Rounded Corner", id: "rounded_corner"}, 
 	    	{text: "Verticals Bars", id: "verticals"}];
 	 	cboStyleAttr.selectedId = "verticals";
         cboStyleAttr.events = {action: doAction};
@@ -771,6 +778,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    margins: this._chkMargins.get("selected") ? "15px" : null,
 			columnWidth: columnWidths,
 			headerVisible: this._chkHeader.get("selected"),			
+		 	radius: this._chkRadius.get("selected") ? "20px" : null,
+		    boxShadow: this._chkShadow.get("selected") ? "3px 3px 12px 2px black" : null,
 			children: children
 		}
 		this.content.set("background", "#ffffff");
@@ -814,14 +823,12 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.rolloverEnabled = true;
 		    attr.insets = "12px 8px";
 		    attr.horizontalLine = "2px solid #ffffff";
-		    attr.radius = "20px";
 	 	} else if (style === "verticals") {
 		    attr.insets = "10px 5px";
 		    attr.verticalLine = "3px solid #dddddd";
 		    attr.foreground = "gray";
 		    attr.background = "#f4f4f4";
 		    attr.headerForeground = "gray";
-			attr.boxShadow = "3px 3px 12px 2px black";
 	 	} else if (style === "xxxx") {
 	 	 	//"Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
 		    attr.boxShadow = "3px 3px 12px 2px black";
