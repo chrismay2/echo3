@@ -644,9 +644,11 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	_chkHeader: null,
 	_cboStyle: null,
 	_cboWidth: null,
+	_cboHeight: null,
 	_cboCols: null,
 	_chkRadius: null,
 	_chkShadow: null,
+	_chkExtraCols: null,
 
     $construct: function() {
         TestApp.TestPane.call(this);
@@ -656,11 +658,6 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
         var doAction = function(e) {
         	that._showTable();
         };
-
-		var a = {selected: true, text: "Big data", events: {action: doAction}};
-		
-		this._chkBigData = new Echo.CheckBox(a);
-	    this.controlsColumn.add(this._chkBigData);
 
 		this._chkHeader = new Echo.CheckBox({selected: true, text: "Header", events: {action: doAction}});
 	    this.controlsColumn.add(this._chkHeader);
@@ -673,6 +670,12 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 
 		this._chkShadow = new Echo.CheckBox({selected: false, text: "Box Shadow", events: {action: doAction}});
 	    this.controlsColumn.add(this._chkShadow);
+
+		this._chkBigData = new Echo.CheckBox({selected: true, text: "Extra Rows", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkBigData);
+
+		this._chkExtraCols = new Echo.CheckBox({selected: false, text: "Extra Columns", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkExtraCols);
 	    
 	    var cboStyleAttr = {};
 	    cboStyleAttr.items = [
@@ -695,12 +698,21 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
         cboWidthAttr.events = {action: doAction};
         this.controlsColumn.add(this._cboWidth = new Echo.SelectField(cboWidthAttr));
 
+	    var cboHeightAttr = {};
+	    cboHeightAttr.items = [
+	    	{text: "Height = 320px", id: "320px"}, 
+	    	{text: "Height = 80%", id: "80%"}, 
+	    	{text: "Height = null", id: null}];
+	    cboHeightAttr.selectedId = "320px";	
+        cboHeightAttr.events = {action: doAction};
+        this.controlsColumn.add(this._cboHeight = new Echo.SelectField(cboHeightAttr));
+
 	    var cboColsAttr = {};
 	    cboColsAttr.items = [
+	    	{text: "Columns = null", id: null},
 	    	{text: "Columns = 20/40/40/20%", id: "percent"},
-	    	{text: "Columns = 100/100/300/100px", id: "pixel"}, 
-	    	{text: "Columns = null", id: "null"}];
-	    cboColsAttr.selectedId = "percent";		
+	    	{text: "Columns = 80/80/240/80px", id: "pixel"}];
+	    cboColsAttr.selectedId = "null";		
         cboColsAttr.events = {action: doAction};
         this.controlsColumn.add(this._cboCols = new Echo.SelectField(cboColsAttr));
 
@@ -742,12 +754,14 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		var columnWidths = null;
 		switch (this._cboCols.get("selectedId")) {
 		case "pixel":
-			columnWidths =  ["100px", "100px", "300px", "100px"];
+			columnWidths =  ["80px", "80px", "240px", "80px"];
 			break;
 		case "percent":
 			columnWidths =  ["20%", "40%", "40%", "20%"];
 			break;
 		}
+
+		var colCount = this._chkExtraCols.get("selected") ? 12 : 4;
 		
 		var childrenTexts = [
 			"Employee", "Net Salary", "Bonus", "Supervisor",
@@ -756,24 +770,31 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 			"Joyce Ming", "$200", "$35", "Andy",
 			"James Albert Pentel", "$175", "$25", "Annie"];
 		var children = [];
+		var z = 0;
 		for (var i = 0; i < childrenTexts.length; i++) {
 			if (i === 12) {
-				children[i] = new Echo.CheckBox({text: childrenTexts[i], border: "1px solid #665566", icon: "img/test.png"});
+				children[z++] = new Echo.CheckBox({text: childrenTexts[i], border: "1px solid #665566", icon: "img/test.png"});
 			} else  {
-				children[i] = new Echo.Label({text: childrenTexts[i]});
+				children[z++] = new Echo.Label({text: childrenTexts[i]});
+			}
+			if ((i + 1)  % 4 === 0) {
+				for (var j = 4; j < colCount; j++) {
+					children[z++] = new Echo.Label({text: "Extra_" + j});
+				}
 			}
 		}
+		
 		if (this._chkBigData.get("selected")) {
-			for (var j = 0; j < 200; j++) {
-				children[j +20] = new Echo.Label({text: "Data_" + j});
+			for (var k = 0; k < 240; k++) {
+				children[z++] = new Echo.Label({text: "Data_" + k});
 			}
 		}
 		
 	 	var attr = {
-		    columnCount: 4,
-		    rowCount: children.length / 4 ,
+		    columnCount: colCount,
+		    rowCount: z / colCount,
 		    width: tableWidth,
-		    height: "280px",
+		    height: this._cboHeight.get("selectedId"),
 		    selection: "2",
 		    margins: this._chkMargins.get("selected") ? "15px" : null,
 			columnWidth: columnWidths,
@@ -845,9 +866,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.verticalLine = "2px dotted #778899";
 		    attr.zebraBackground = "#eeeeee";
 		}
-		
-		//   headerVisible: false,
-		
+				
 	 	var table = new Echo.Sync.RemoteTable(attr);
 	    tableContainer.add(table);
 	 }
