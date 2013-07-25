@@ -83,7 +83,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 	  * widths smaller than content
 	 */	
     CSS_COL_STYLE: [],
-       
+
+	/**
+	 * Have the column widths be changed (by dragging a column)?
+	 */ 
+	 _manualColWidths: false,       
     
     $load: function() {
         Echo.Render.registerPeer("RemoteTable", this);
@@ -352,7 +356,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 		    this._divBody.style.right = "0px";
 		    this._divBody.style.overflow = "auto";
 			this._div.appendChild(this._divBody);
-			
+		   			
 			//sync header and body scrolls
 			var that = this;
 	   		this._divBody.onscroll = function(e) {
@@ -362,11 +366,8 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         
         this._table = document.createElement("table");
         this._table.style.borderSpacing = "0px";
-        this._table.style.whiteSpace = "nowrap";
-        this._table.style.tableLayout = "fixed";  //needed so columns can get smaller than content
-        
+        this._table.style.whiteSpace = "nowrap"; 
         Echo.Sync.renderComponentDefaults(this.component, this._table);
-        
         if (this._headerVisible) {
 	        this._divBody.appendChild(this._table);
         } else {
@@ -411,7 +412,8 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 			//height is not set, so calculate it and adjust outer div accordingly
 			var actualTableHeight = this._table.clientHeight;
     		this._div.style.height = (headerHeight + actualTableHeight) + "px";
-		}		
+		}
+		
 		if (!this._headerVisible) {
 			return;
 		}
@@ -426,30 +428,22 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 		var scrollVisible = this._divBody.scrollHeight > this._divBody.clientHeight;
     	this._divHeader.style.marginRight = scrollVisible ? "17px" : "0px";
     	
+    	
     	if (this._table.rows.length === 0) return;
-    	
-    	
-    	var headerRow = this._tableHeader.rows[0];
-    	var firstRow = this._table.rows[0];
-    	for (var i = 0; i < firstRow.cells.length; i++) {
-	    	var w = firstRow.cells[i].offsetWidth - 5;
-	    	if (w < 0) break;
-			var t = ".cssColClass_" + i + " {width: " + (w - 8) + "px;} " 
-				+ ".cssHeaderTdClass_" + i + " {width: " + w + "px;} "
-				+ ".cssHeaderDivClass_" + i + " {width: " + (w - 24) + "px;}";
-				
-				
-			if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-				this.CSS_COL_STYLE[i].styleSheet.cssText = t;		
-			} else {
-				this.CSS_COL_STYLE[i].innerHTML = t;
-			}
-			
-			//headerRow.cells[i].style.width = w + "px";
-			//headerRow.cells[i].firstChild.style.width = w - 24 + "px";
 
-		}    	
-
+		//adjust header to body column widths    	
+    	var firstBodyRow = this._table.rows[0];
+    	var totalWidth = 0;
+    	for (var i = 0; i < firstBodyRow.cells.length; i++) {
+	    	var w = firstBodyRow.cells[i].offsetWidth;
+	    	this._resizeColumn(w - 6, false, i);
+	    	totalWidth += w;
+		}
+		if (!this._width) {
+            this._div.style.width = (totalWidth + 17) + "px";
+            this._table.style.width = "100%"; 
+		}
+		
     },
 
     /** @see Echo.Render.ComponentSync#renderDispose */
@@ -518,8 +512,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         }
     },
 
-
-
     /**
      * Creates a prototype TR element for the rendered table, containing style information
      * and TD elements representing the table cells.  This prototype may be cloned to
@@ -541,16 +533,13 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 	    }
         
         tdPrototype.style.display = "table-cell";
-        if (!isHeader) {
-//            tdPrototype.style.padding = this._defaultCellPadding;
-	    }
         tdPrototype.style.verticalAlign = "middle";
         tdPrototype.style.overflow = "hidden";
 		tdPrototype.style.textOverflow = "ellipsis";
         
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var td = tdPrototype.cloneNode(false);
-            td.className  = "cssTDClass_" + columnIndex;
+            td.className  = (isHeader ? "cssTDClassHeader_" : "cssTDClassBody_") + columnIndex;
             if (columnIndex == 0 && this._verticalLine) {
             	//draw the left-most vertical line
             	td.style.borderLeft = this._verticalLine;
@@ -580,7 +569,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         var td = tr.firstChild;
         for (var columnIndex = 0; columnIndex < this._columnCount; columnIndex++) {
             var child = this.component.getComponent((rowIndex + (this._headerVisible ? 1 : 0)) * this._columnCount + columnIndex);
-            if (!child) break;  //XXX
+            if (!child) break;  //XXX ?
             var layoutData = child.render("layoutData");            
             if (layoutData) {
                 Echo.Sync.Insets.render(layoutData.insets, td, "padding");
@@ -589,9 +578,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 Echo.Sync.Color.render(layoutData.background, td, "backgroundColor");
             }
             if (rowIndex === -1) {
-            
-                 td.style.height = "24px";
-            
 				var titleDiv = document.createElement("div");
 				titleDiv.style.styleFloat = "left";
 				titleDiv.style.background = "#e990aa";
@@ -635,7 +621,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         }
         return tr;
     },
-    
+
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
         if (!update.hasUpdatedLayoutDataChildren() && !update.getAddedChildren() && !update.getRemovedChildren()) {
@@ -659,7 +645,23 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this.renderAdd(update, containerElement);
         return true;
     },
-    
+
+ 	_resizeColumn: function(width, resizeBodyCol, col) {
+    	if (width < 1) return;
+		var t = ".cssTDClassHeader_" + col + " {width: " + width + "px;} " 
+			+ ".cssDivClassHeader_" + col + " {width: " + (width - 18) + "px;}";
+		if (resizeBodyCol) {
+			t += " .cssTDClassBody_" + col + " {width: " + width + "px;} "
+			  + ".cssDivClassBody_" + col + " {width: " + (width - 10) + "px;}";
+		}
+		if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
+			this.CSS_COL_STYLE[col].styleSheet.cssText = t;		
+		} else {
+			this.CSS_COL_STYLE[col].innerHTML = t;
+		}
+    },
+ 
+
     /**
      * Sets the selection state based on the given selection property value.
      *
@@ -811,28 +813,41 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 	              	
 	onDown: function (e) {
 		this._startX = 0; 
-//		this._initTableWidth = this.getColRatioWidth();
-    	this._thisRef._table.style.width = null;  //width is not needed any more for calculating the inital column widths
-		
-		var headerRow = this._thisRef._tableHeader.rows[0];
-    	this._cellWidth = headerRow.cells[this._col].offsetWidth;
+    	
+    	if (!this._thisRef._manualColWidths) {
+    		this._thisRef._manualColWidths = true;
+    		
+    		//set column width to absolute values
+	    	var firstBodyRow = this._thisRef._table.rows[0];
+	    	for (var i = 0; i < firstBodyRow.cells.length; i++) {
+		    	var w = firstBodyRow.cells[i].offsetWidth - 6;
+		    	this._thisRef._resizeColumn(w, true, i);
+		    	if (i === this._col) {
+		    		this._cellWidth = w;
+		    	}
+			}
+			if (this._thisRef._width) {
+				//when table width is set then expand columns
+				//and add horizontal scrollbar when needed
+				//in case width is null then the whole table expands
+		    	this._thisRef._table.style.width = null;
+		    }
+    	} else {
+    		var headerRow = this._thisRef._tableHeader.rows[0];
+    		this._cellWidth = headerRow.cells[this._col].offsetWidth - 6;
+    	}    	
 	},
 	
 	onMove: function (delta) {
 		this._startX += delta.x;
-    	var t0Row = this._thisRef._tableHeader.rows[0];
-    	var t1Row = this._thisRef._table.rows[0];
-		
 		var w = this._cellWidth + this._startX;
 		//respect minimum size
 		if (w < 18) w = 18;
-		var t = ".cssTDClass_" + this._col + " {width: " + w + "px;} " 
-			+ ".cssDivClassHeader_" + this._col + " {width: " + (w - 18) + "px;} "
-			+ ".cssDivClassBody_" + this._col + " {width: " + (w - 10) + "px;}";
-		if (Core.Web.Env.BROWSER_INTERNET_EXPLORER) {
-			this._thisRef.CSS_COL_STYLE[this._col].styleSheet.cssText = t;		
-		} else {
-			this._thisRef.CSS_COL_STYLE[this._col].innerHTML = t;
-		}
+		this._thisRef._resizeColumn(w, true, this._col);
+		
+		if (!this._thisRef._width) {
+			var tableWidth = parseInt(this._thisRef._div.style.width);
+            this._thisRef._div.style.width = (tableWidth + delta.x) + "px";
+		}		
 	}
 });
