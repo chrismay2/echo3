@@ -4,7 +4,6 @@
 Echo.Sync.RemoteTable = Core.extend(Echo.Component, {
 
     $static: {
-
         /**
          * Default selection background color. Used only when no selection style
          * properties have been set.
@@ -20,7 +19,6 @@ Echo.Sync.RemoteTable = Core.extend(Echo.Component, {
          * @type Color
          */
         DEFAULT_SELECTION_FOREGROUND: "#ffffff"
-
     },
 
     $load: function() {
@@ -32,7 +30,6 @@ Echo.Sync.RemoteTable = Core.extend(Echo.Component, {
     componentType: "RemoteTable",
 
     $virtual: {
-
         /**
          * Programmatically performs a button action.
          */
@@ -344,8 +341,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             }
             this._div.appendChild(this._divHeader);
 
-            // this div just sets the background of the upper right
-            // corner
+            // this div just sets the background of the upper right corner
             this._divHeader2 = document.createElement("div");
             this._divHeader2.style.position = "absolute";
             this._divHeader2.style.right = "0px";
@@ -358,8 +354,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             }
             this._div.appendChild(this._divHeader2);
 
-            // this intermediate div is needed so the columns don't get
-            // 'squeezed'
+            // this intermediate div is needed so the columns don't get 'squeezed'
             // that is, they would render with less width then assigned
             this._divHeader3 = document.createElement("div");
             this._divHeader3.style.width = "9999px";
@@ -632,11 +627,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      * @param {Echo.Update.ComponentUpdate} update the update
      * @param {Number} rowIndex the index of the row
      * @param {Element} trPrototype a TR element containing the
-     *                appropriate number of TD elements with default
-     *                styles applied (This is created by
-     *                _renderRowStyle(). Providing this attribute is
-     *                optional, and is specified for performance
-     *                reasons. If omitted one is created automatically.)
+     *     appropriate number of TD elements with default  styles applied (This is created by
+     *     _renderRowStyle(). Providing this attribute is optional, and is specified for performance
+     *     reasons. If omitted one is created automatically.)
      * @return the created row
      * @type Element
      */
@@ -666,10 +659,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 titleDiv.style.textOverflow = "ellipsis";
                 titleDiv.className = "cssDivClassHeader_" + this._getCssId(columnIndex);
                 titleDiv.style.padding = this._defaultCellPadding;
-                titleDiv.style.paddingRight = "0px"; // the resize
-                                                        // handle is
-                                                        // enough
-                                                        // 'padding'...
+                titleDiv.style.paddingRight = "0px"; // the resize handle is enough 'padding'...
                 td.appendChild(titleDiv);
                 Echo.Render.renderComponentAdd(update, child, titleDiv);
 
@@ -686,16 +676,11 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 var resizeListener = new ColumnResizeListener(columnIndex, resizeHandle, this);
                 resizeListener.addMoveListener(resizeHandle);
             } else {
-                // this div is needed for FF and IE so the columns can
-                // get
-                // smaller than their content (not actually needed for
-                // Chrome)
-                // Note: it would work if we would set the table width
-                // but this
-                // we do not want because otherwise on resize the
-                // columns following
-                // the resizing column wouldn't move to the right but
-                // rather squeeze
+                // this div is needed for FF and IE so the columns can get
+                // smaller than their content (not actually needed for Chrome)
+                // Note: it would work if we would set the table width but this
+                // we do not want because otherwise on resize the columns following
+                // the resizing column wouldn't move to the right but rather squeeze
                 var bodyDiv = document.createElement("div");
                 bodyDiv.style.overflow = "hidden";
                 bodyDiv.style.textOverflow = "ellipsis";
@@ -905,6 +890,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
 
     onDown: function(e) {
         this._startX = 0;
+        var borderWidth = (this._col === 0 ? 2 : 1) * this._thisRef._verticalOffset; 
 
         if (!this._thisRef._manualColWidths) {
             this._thisRef._manualColWidths = true;
@@ -918,7 +904,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
             // set column widths to absolute values
             var firstBodyRow = this._thisRef._table.rows[0];
             for (var i = 0; i < firstBodyRow.cells.length; i++) {
-                var w = firstBodyRow.cells[i].offsetWidth - 6;
+                var w = firstBodyRow.cells[i].offsetWidth - borderWidth;
                 this._thisRef._resizeColumn(w, true, i);
                 if (i === this._col) {
                     this._cellWidth = w;
@@ -932,7 +918,7 @@ ColumnResizeListener = Core.extend(Echo.MouseListener, {
             }
         } else {
             var headerRow = this._thisRef._tableHeader.rows[0];
-            this._cellWidth = headerRow.cells[this._col].offsetWidth - 6;
+            this._cellWidth = headerRow.cells[this._col].offsetWidth - borderWidth;
         }
     },
 
