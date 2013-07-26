@@ -33,6 +33,8 @@ import java.io.Serializable;
 
 /**
  * A description of an update to a property of an object.
+ * 
+ * This class is needed only for unit test usage
  */
 public class PropertyUpdate 
 implements Serializable {

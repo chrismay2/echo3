@@ -35,6 +35,7 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
+import nextapp.echo.app.Border.Side;
 import nextapp.echo.app.event.ActionEvent;
 import nextapp.echo.app.event.ActionListener;
 import nextapp.echo.app.event.ChangeEvent;
@@ -72,7 +73,9 @@ public class Table extends BorderedComponent {
     public static final TableCellRenderer DEFAULT_TABLE_CELL_RENDERER = new DefaultTableCellRenderer();
 
     public static final String PROPERTY_ACTION_COMMAND = "actionCommand";
+    public static final String PROPERTY_HEADER_SEPARATOR_LINE = "headerSeparatorLine";
     public static final String PROPERTY_HEIGHT = "height";
+    public static final String PROPERTY_HORIZONTAL_LINE = "horizontalLine";
     public static final String PROPERTY_INSETS = "insets";
     public static final String PROPERTY_ROLLOVER_BACKGROUND = "rolloverBackground";
     public static final String PROPERTY_ROLLOVER_BACKGROUND_IMAGE = "rolloverBackgroundImage";
@@ -84,13 +87,11 @@ public class Table extends BorderedComponent {
     public static final String PROPERTY_SELECTION_ENABLED = "selectionEnabled";
     public static final String PROPERTY_SELECTION_FONT = "selectionFont";
     public static final String PROPERTY_SELECTION_FOREGROUND= "selectionForeground";
+    public static final String PROPERTY_VERTICAL_LINE = "verticalLine";
     public static final String PROPERTY_WIDTH = "width";
     public static final String PROPERTY_ZEBRA_BACKGROUND = "zebraBackground";
     
-    //
-    //verticalLine
-    //horizontalLine
-    
+
     public static final String INPUT_ACTION = "action";
 
     public static final String ACTION_LISTENERS_CHANGED_PROPERTY = "actionListeners";
@@ -734,7 +735,16 @@ public class Table extends BorderedComponent {
         }
         firePropertyChange(DEFAULT_RENDERER_CHANGED_PROPERTY, null, null);
     }
-    
+
+    /**
+     * Set a line separating the header from the body
+     * 
+     * @param newValue The line separating the header from the body
+     */
+    public void setHeaderSeparatorLine(Side newValue) {
+        set(PROPERTY_HEADER_SEPARATOR_LINE, newValue == null ? null : newValue.toString());
+    }
+
     /**
      * Sets the visibility state of the table header.
      * 
@@ -759,7 +769,16 @@ public class Table extends BorderedComponent {
     public void setHeight(Extent newValue) {
         set(PROPERTY_HEIGHT, newValue);
     }
-    
+
+    /**
+     * Set a line separating the rows
+     * 
+     * @param newValue The line separating the rows
+     */
+    public void setHorizontalLine(Side newValue) {
+        set(PROPERTY_HORIZONTAL_LINE, newValue == null ? null : newValue.toString());
+    }
+
     /**
      * Sets the default cell insets.
      * 
@@ -927,7 +946,16 @@ public class Table extends BorderedComponent {
         selectionModel = newValue;
         firePropertyChange(SELECTION_MODEL_CHANGED_PROPERTY, oldValue, newValue);
     }
-    
+
+    /**
+     * Set a line separating the columns
+     * 
+     * @param newValue The line separating the columns
+     */
+    public void setVerticalLine(Side newValue) {
+        set(PROPERTY_VERTICAL_LINE, newValue == null ? null : newValue.toString());
+    }
+
     /**
      * Sets the overall width of the grid.
      * This property supports <code>Extent</code>s with

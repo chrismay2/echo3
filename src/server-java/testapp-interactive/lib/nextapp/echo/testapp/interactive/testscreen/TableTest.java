@@ -31,6 +31,7 @@ package nextapp.echo.testapp.interactive.testscreen;
 
 import nextapp.echo.app.Alignment;
 import nextapp.echo.app.Border;
+import nextapp.echo.app.Border.Side;
 import nextapp.echo.app.Button;
 import nextapp.echo.app.Color;
 import nextapp.echo.app.Column;
@@ -552,6 +553,36 @@ public class TableTest extends SplitPane {
         controlsColumn.addButton("Clear Radius", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 testTable.setRadius(null);
+            }
+        });
+        controlsColumn.addButton("Set Header Separator", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderSeparatorLine(new Side(8, Color.ORANGE, Border.STYLE_SOLID));
+            }
+        });
+        controlsColumn.addButton("Clear Header Separator", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderSeparatorLine(null);
+            }
+        });
+        controlsColumn.addButton("Set Horizontal Line", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHorizontalLine(new Side(3, Color.GREEN, Border.STYLE_SOLID));
+            }
+        });
+        controlsColumn.addButton("Clear Horizontal Line", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHorizontalLine(null);
+            }
+        });
+        controlsColumn.addButton("Set Vertical Line", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setVerticalLine(new Side(3, Color.MAGENTA, Border.STYLE_SOLID));
+            }
+        });
+        controlsColumn.addButton("Clear Vertical Line", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setVerticalLine(null);
             }
         });
         controlsColumn.addButton("Set Insets 0px", new ActionListener() {

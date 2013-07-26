@@ -241,6 +241,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
     /** @see Echo.Render.ComponentSync#renderAdd */
     renderAdd: function(update, parentElement) {
+        
+        console.log("XXXXXXXXXXX " + this.component.render("verticalLine"));
+        
         this._columnCount = parseInt(this.component.render("columnCount"), 10);
         this._rowCount = parseInt(this.component.render("rowCount"), 10);
         this._height = this.component.render("height");
@@ -318,7 +321,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             this._divHeader.style.overflow = "hidden";
             Echo.Sync.Color.render(this.component.render("headerBackground"), this._divHeader, "backgroundColor");
             Echo.Sync.Color.render(this.component.render("headerForeground"), this._divHeader, "color");
-            var separatorLine = this.component.render("separatorLine");
+            var separatorLine = this.component.render("headerSeparatorLine");
             if (separatorLine) {
                 this._divHeader.style.borderBottom = separatorLine;
             }
@@ -426,6 +429,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             this._div.style.height = (headerHeight + this._table.clientHeight + scrollOffset) + "px";
         }
 
+        if (this._table.rows.length == 0) {
+            return;
+        }
+        
         var firstBodyRow = this._table.rows[0];
         var scrollOffset = scrollElement.scrollHeight > scrollElement.clientHeight ? 17 : 0;
         if (!this._width) {
@@ -684,6 +691,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
     /** @see Echo.Render.ComponentSync#renderUpdate */
     renderUpdate: function(update) {
+        
+        console.log("X22222222 " + this.component.render("verticalLine"));
+
+        
         if (!update.hasUpdatedLayoutDataChildren() && !update.getAddedChildren() && !update.getRemovedChildren()) {
             if (Core.Arrays.containsAll(Echo.Sync.RemoteTableSync._supportedPartialProperties, update.getUpdatedPropertyNames(), true)) {
                 // partial update

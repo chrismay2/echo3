@@ -815,7 +815,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	} else if (style === "horizontal_minimalist") {
 		    attr.insets = "10px 5px";
 		    attr.horizontalLine = "1px solid #dddddd";
-		    attr.separatorLine = "3px solid #778899";
+		    attr.headerSeparatorLine = "3px solid #778899";
 		    attr.rolloverBackground = "#f0f0FD";
 		    attr.rolloverEnabled = true;
 		    attr.foreground = "gray";
@@ -838,7 +838,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    attr.rolloverForeground = "#770077";
 		    attr.background = "#f3f3f3";
 		    attr.rolloverEnabled = true;
-		    attr.separatorLine = "6px solid #ffffff";
+		    attr.headerSeparatorLine = "6px solid #ffffff";
 		    attr.horizontalLine = "4px solid #ffffff";
 	 	} else if (style === "rounded_corner") {
 		    attr.background = "#E8EDFF";

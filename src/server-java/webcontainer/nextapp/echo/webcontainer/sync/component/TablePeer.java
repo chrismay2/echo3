@@ -90,6 +90,7 @@ public class TablePeer extends AbstractComponentSynchronizePeer {
         addOutputProperty(PROPERTY_ROW_COUNT);
         addOutputProperty(PROPERTY_SELECTION);
         addOutputProperty(PROPERTY_SELECTION_MODE);
+        addOutputProperty(Table.PROPERTY_VERTICAL_LINE);
         
         addEvent(new AbstractComponentSynchronizePeer.EventPeer(Table.INPUT_ACTION, Table.ACTION_LISTENERS_CHANGED_PROPERTY) {
             public boolean hasListeners(Context context, Component component) {
