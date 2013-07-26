@@ -39,6 +39,7 @@ import nextapp.echo.app.update.ClientUpdateManager;
 import nextapp.echo.app.update.ServerComponentUpdate;
 import nextapp.echo.app.util.Context;
 import nextapp.echo.webcontainer.AbstractComponentSynchronizePeer;
+import nextapp.echo.webcontainer.ContentType;
 import nextapp.echo.webcontainer.ServerMessage;
 import nextapp.echo.webcontainer.Service;
 import nextapp.echo.webcontainer.WebContainerServlet;
@@ -76,6 +77,7 @@ public class TablePeer extends AbstractComponentSynchronizePeer {
     
     static {
         WebContainerServlet.getServiceRegistry().add(TABLE_SERVICE);
+        WebContainerServlet.getResourceRegistry().add("Echo", "resource/Handle.png", ContentType.IMAGE_PNG);
     }
     
     /** Default constructor. */

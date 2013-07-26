@@ -419,13 +419,14 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         if (this._headerVisible) {
             headerHeight = this._tableHeader.clientHeight;
         }
+        var scrollElement = this._headerVisible ? this._divBody : this._div;
         if (!this._height) {
             // height is not set, so calculate it and adjust outer div accordingly
-            this._div.style.height = (headerHeight + this._table.clientHeight) + "px";
+            var scrollOffset = scrollElement.scrollWidth > scrollElement.clientWidth ? 17 : 0;
+            this._div.style.height = (headerHeight + this._table.clientHeight + scrollOffset) + "px";
         }
 
         var firstBodyRow = this._table.rows[0];
-        var scrollElement = this._headerVisible ? this._divBody : this._div;
         var scrollOffset = scrollElement.scrollHeight > scrollElement.clientHeight ? 17 : 0;
         if (!this._width) {
             // calculate width if not set
@@ -436,7 +437,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             }
             this._div.style.width = (totalWidth + scrollOffset) + "px";
             this._table.style.width = "100%";
-            if (!this._headerVisibl && !this._height && scrollElement.scrollHeight === scrollElement.clientHeight && scrollOffset > 0) {
+            if (!this._headerVisible && !this._height && scrollElement.scrollHeight === scrollElement.clientHeight && scrollOffset > 0) {
                 //fix when no header, width and height are set
                 this._div.style.width = totalWidth + "px";
             }
@@ -649,7 +650,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 Echo.Render.renderComponentAdd(update, child, titleDiv);
 
                 var resizeHandle = document.createElement("div");
-                resizeHandle.style.background = "#ee00aa";
+//                resizeHandle.style.background = "#ee00aa";
+                var img = this.client.getResourceUrl("Echo", "resource/Handle.png");
+                Echo.Sync.FillImage.render(img, resizeHandle);  
                 resizeHandle.style.cursor = "col-resize";
                 resizeHandle.style.styleFloat = "right"; // IE only
                 resizeHandle.style.cssFloat = 'right';
