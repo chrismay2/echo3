@@ -35,7 +35,6 @@ import java.util.EventListener;
 import java.util.HashMap;
 import java.util.Map;
 
-import nextapp.echo.app.Border.Side;
 import nextapp.echo.app.event.ActionEvent;
 import nextapp.echo.app.event.ActionListener;
 import nextapp.echo.app.event.ChangeEvent;
@@ -742,7 +741,7 @@ public class Table extends BorderedComponent {
      * @param newValue The line separating the header from the body
      */
     public void setHeaderSeparatorLine(Side newValue) {
-        set(PROPERTY_HEADER_SEPARATOR_LINE, newValue == null ? null : newValue.toString());
+        set(PROPERTY_HEADER_SEPARATOR_LINE, newValue);
     }
 
     /**
@@ -776,7 +775,7 @@ public class Table extends BorderedComponent {
      * @param newValue The line separating the rows
      */
     public void setHorizontalLine(Side newValue) {
-        set(PROPERTY_HORIZONTAL_LINE, newValue == null ? null : newValue.toString());
+        set(PROPERTY_HORIZONTAL_LINE, newValue);
     }
 
     /**
@@ -953,7 +952,7 @@ public class Table extends BorderedComponent {
      * @param newValue The line separating the columns
      */
     public void setVerticalLine(Side newValue) {
-        set(PROPERTY_VERTICAL_LINE, newValue == null ? null : newValue.toString());
+        set(PROPERTY_VERTICAL_LINE, newValue);
     }
 
     /**

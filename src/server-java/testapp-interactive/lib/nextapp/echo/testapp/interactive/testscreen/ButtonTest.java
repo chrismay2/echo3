@@ -47,6 +47,7 @@ import nextapp.echo.app.Insets;
 import nextapp.echo.app.Label;
 import nextapp.echo.app.LayoutDirection;
 import nextapp.echo.app.RadioButton;
+import nextapp.echo.app.Side;
 import nextapp.echo.app.SplitPane;
 import nextapp.echo.app.button.AbstractButton;
 import nextapp.echo.app.button.ButtonGroup;
@@ -301,16 +302,16 @@ extends SplitPane {
             public void actionPerformed(ActionEvent e) {
                 apply(new Applicator() {
                     public void apply(AbstractButton button) {
-                        button.setBorder(new Border(new Border.Side[]{
-                           new Border.Side(1, Color.BLUE, Border.STYLE_SOLID),
-                           new Border.Side(1, Color.CYAN, Border.STYLE_SOLID),
+                        button.setBorder(new Border(new Side[]{
+                           new Side(1, Color.BLUE, Border.STYLE_SOLID),
+                           new Side(1, Color.CYAN, Border.STYLE_SOLID),
                            null,
                            null
                         }));
-                        button.setRolloverBorder(new Border(new Border.Side[]{
-                           new Border.Side(1, Color.RED, Border.STYLE_SOLID),
+                        button.setRolloverBorder(new Border(new Side[]{
+                           new Side(1, Color.RED, Border.STYLE_SOLID),
                            null,
-                           new Border.Side(1, Color.YELLOW, Border.STYLE_SOLID),
+                           new Side(1, Color.YELLOW, Border.STYLE_SOLID),
                            null
                         }));
                         button.setRolloverEnabled(true);

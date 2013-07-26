@@ -31,7 +31,6 @@ package nextapp.echo.testapp.interactive.testscreen;
 
 import nextapp.echo.app.Alignment;
 import nextapp.echo.app.Border;
-import nextapp.echo.app.Border.Side;
 import nextapp.echo.app.Button;
 import nextapp.echo.app.Color;
 import nextapp.echo.app.Column;
@@ -40,6 +39,7 @@ import nextapp.echo.app.Extent;
 import nextapp.echo.app.Insets;
 import nextapp.echo.app.Label;
 import nextapp.echo.app.SelectField;
+import nextapp.echo.app.Side;
 import nextapp.echo.app.SplitPane;
 import nextapp.echo.app.Table;
 import nextapp.echo.app.TaskQueueHandle;

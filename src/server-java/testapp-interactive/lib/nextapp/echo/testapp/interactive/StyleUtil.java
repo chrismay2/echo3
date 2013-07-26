@@ -32,10 +32,11 @@ package nextapp.echo.testapp.interactive;
 import nextapp.echo.app.Alignment;
 import nextapp.echo.app.Border;
 import nextapp.echo.app.BoxShadow;
+import nextapp.echo.app.BoxShadow.BoxStyle;
 import nextapp.echo.app.Color;
 import nextapp.echo.app.Extent;
 import nextapp.echo.app.Font;
-import nextapp.echo.app.BoxShadow.BoxStyle;
+import nextapp.echo.app.Side;
 
 /**
  * 
@@ -107,12 +108,12 @@ public class StyleUtil {
         return new Border(randomExtent(25), randomColor(), randomBorderStyle());
     }
     
-    public static Border.Side randomBorderSide() {
-        return new Border.Side(randomExtent(25), randomColor(), randomBorderStyle());
+    public static Side randomBorderSide() {
+        return new Side(randomExtent(25), randomColor(), randomBorderStyle());
     }
     
     public static Border randomMultisidedBorder() {
-        return new Border(new Border.Side[]{ randomBorderSide(), randomBorderSide(), randomBorderSide(), randomBorderSide()}); 
+        return new Border(new Side[]{ randomBorderSide(), randomBorderSide(), randomBorderSide(), randomBorderSide()}); 
     }
     
     public static int randomBorderStyle() {
