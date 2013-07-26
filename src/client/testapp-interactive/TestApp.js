@@ -662,8 +662,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		this._chkHeader = new Echo.CheckBox({selected: true, text: "Header", events: {action: doAction}});
 	    this.controlsColumn.add(this._chkHeader);
 
-		this._chkMargins = new Echo.CheckBox({selected: true, text: "Margins", events: {action: doAction}});
-	    this.controlsColumn.add(this._chkMargins);
+		this._chkOutsets = new Echo.CheckBox({selected: true, text: "Outsets", events: {action: doAction}});
+	    this.controlsColumn.add(this._chkOutsets);
 
 		this._chkRadius = new Echo.CheckBox({selected: false, text: "Radius", events: {action: doAction}});
 	    this.controlsColumn.add(this._chkRadius);
@@ -800,7 +800,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 		    width: tableWidth,
 		    height: this._cboHeight.get("selectedId"),
 		    selection: "2",
-		    margins: this._chkMargins.get("selected") ? "15px" : null,
+		    outsets: this._chkOutsets.get("selected") ? "15px" : null,
 			columnWidth: columnWidths,
 			headerVisible: this._chkHeader.get("selected"),			
 		 	radius: this._chkRadius.get("selected") ? "20px" : null,
@@ -851,6 +851,7 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	 	} else if (style === "verticals") {
 		    attr.insets = "10px 5px";
 		    attr.verticalLine = "3px solid #dddddd";
+		    attr.headerSeparatorLine = "8px solid #ff55ff";
 		    attr.foreground = "gray";
 		    attr.background = "#f4f4f4";
 		    attr.headerForeground = "gray";

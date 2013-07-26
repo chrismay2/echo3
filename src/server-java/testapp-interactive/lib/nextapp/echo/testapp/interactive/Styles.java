@@ -105,10 +105,9 @@ public class Styles {
     
     public static final ImageReference ICON_LOGO =  new ResourceImageReference(IMAGE_PATH + "Logo.png");
     public static final ImageReference DISABLED_ICON_LOGO =  new ResourceImageReference(IMAGE_PATH + "LogoDisabled.png");
-    public static final ImageReference ROLLOVER_ICON_LOGO 
-            = new ResourceImageReference(IMAGE_PATH + "LogoRollover.png");
-    public static final ImageReference PRESSED_ICON_LOGO 
-            = new ResourceImageReference(IMAGE_PATH + "LogoPressed.png");
+    public static final ImageReference ROLLOVER_ICON_LOGO = new ResourceImageReference(IMAGE_PATH + "LogoRollover.png");
+    public static final ImageReference PRESSED_ICON_LOGO = new ResourceImageReference(IMAGE_PATH + "LogoPressed.png");
+    public static final ImageReference RESIZE_HANDLE = new ResourceImageReference(IMAGE_PATH + "ResizeHandle.png");
 
     public static final StyleSheet DEFAULT_STYLE_SHEET;
     public static final StyleSheet GREEN_STYLE_SHEET;

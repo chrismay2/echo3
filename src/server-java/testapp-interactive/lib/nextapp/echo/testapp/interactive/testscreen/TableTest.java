@@ -36,6 +36,7 @@ import nextapp.echo.app.Color;
 import nextapp.echo.app.Column;
 import nextapp.echo.app.Component;
 import nextapp.echo.app.Extent;
+import nextapp.echo.app.FillImage;
 import nextapp.echo.app.Insets;
 import nextapp.echo.app.Label;
 import nextapp.echo.app.SelectField;
@@ -555,16 +556,6 @@ public class TableTest extends SplitPane {
                 testTable.setRadius(null);
             }
         });
-        controlsColumn.addButton("Set Header Separator", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                testTable.setHeaderSeparatorLine(new Side(8, Color.ORANGE, Border.STYLE_SOLID));
-            }
-        });
-        controlsColumn.addButton("Clear Header Separator", new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                testTable.setHeaderSeparatorLine(null);
-            }
-        });
         controlsColumn.addButton("Set Horizontal Line", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 testTable.setHorizontalLine(new Side(3, Color.GREEN, Border.STYLE_SOLID));
@@ -603,6 +594,16 @@ public class TableTest extends SplitPane {
         controlsColumn.addButton("Set Insets 10/20/30/40px", new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 testTable.setInsets(new Insets(10, 20, 30, 40));
+            }
+        });
+        controlsColumn.addButton("Set Outsets 12px", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setOutsets(new Insets(12));
+            }
+        });
+        controlsColumn.addButton("Clear Outsets", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setOutsets(null);
             }
         });
         controlsColumn.addButton("Set Width = null", new ActionListener() {
@@ -666,7 +667,64 @@ public class TableTest extends SplitPane {
                 testTable.setEnabled(!testTable.isEnabled());
             }
         });
-        
+
+        //Header Tests
+
+        controlsColumn = new ButtonColumn();
+        groupContainerColumn.add(controlsColumn);
+        controlsColumn.add(new Label("Header Tests"));
+
+        controlsColumn.addButton("Set Header Background", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderBackground(Color.GREEN);
+            }
+        });
+        controlsColumn.addButton("Clear Header Background", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderBackground(null);
+            }
+        });
+        controlsColumn.addButton("Set Header Foreground", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderForeground(Color.LIGHTGRAY);
+            }
+        });
+        controlsColumn.addButton("Clear Header Foreground", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderForeground(null);
+            }
+        });
+        controlsColumn.addButton("Set Resize Handle Background", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setResizeHandleBackground(Color.CYAN);
+            }
+        });
+        controlsColumn.addButton("Clear Resize Handle Background", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setResizeHandleBackground(null);
+            }
+        });
+        controlsColumn.addButton("Set Resize Handle Image", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setResizeHandleFillImage(new FillImage(Styles.RESIZE_HANDLE));
+            }
+        });
+        controlsColumn.addButton("Clear Resize Handle Image", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setResizeHandleFillImage(null);
+            }
+        });
+        controlsColumn.addButton("Set Header Separator", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderSeparatorLine(new Side(8, Color.ORANGE, Border.STYLE_SOLID));
+            }
+        });
+        controlsColumn.addButton("Clear Header Separator", new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                testTable.setHeaderSeparatorLine(null);
+            }
+        });
+
         // Rollover Effect Settings
 
         controlsColumn = new ButtonColumn();

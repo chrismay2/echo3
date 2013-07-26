@@ -72,10 +72,15 @@ public class Table extends BorderedComponent {
     public static final TableCellRenderer DEFAULT_TABLE_CELL_RENDERER = new DefaultTableCellRenderer();
 
     public static final String PROPERTY_ACTION_COMMAND = "actionCommand";
+    public static final String PROPERTY_HEADER_BACKGROUND = "headerBackground";
+    public static final String PROPERTY_HEADER_FOREGROUND = "headerForeground";
     public static final String PROPERTY_HEADER_SEPARATOR_LINE = "headerSeparatorLine";
     public static final String PROPERTY_HEIGHT = "height";
     public static final String PROPERTY_HORIZONTAL_LINE = "horizontalLine";
     public static final String PROPERTY_INSETS = "insets";
+    public static final String PROPERTY_OUTSETS = "outsets";
+    public static final String PROPERTY_RESIZEHANDLE_BACKGROUND = "resizeHandleBackground"; 
+    public static final String PROPERTY_RESIZEHANDLE_FILLIMAGE = "resizeHandleFillImage";     
     public static final String PROPERTY_ROLLOVER_BACKGROUND = "rolloverBackground";
     public static final String PROPERTY_ROLLOVER_BACKGROUND_IMAGE = "rolloverBackgroundImage";
     public static final String PROPERTY_ROLLOVER_ENABLED = "rolloverEnabled";
@@ -736,6 +741,24 @@ public class Table extends BorderedComponent {
     }
 
     /**
+     * Set the background color of the header
+     * 
+     * @param newValue The background color of the header
+     */
+    public void setHeaderBackground(Color newValue) {
+        set(PROPERTY_HEADER_BACKGROUND, newValue);
+    }
+
+    /**
+     * Set the foreground color of the header
+     * 
+     * @param newValue The foreground color of the header
+     */
+    public void setHeaderForeground(Color newValue) {
+        set(PROPERTY_HEADER_FOREGROUND, newValue);
+    }
+
+    /**
      * Set a line separating the header from the body
      * 
      * @param newValue The line separating the header from the body
@@ -786,7 +809,16 @@ public class Table extends BorderedComponent {
     public void setInsets(Insets newValue) {
         set(PROPERTY_INSETS, newValue);
     }
-    
+
+    /**
+     * Sets the margins (spacing) around the table
+     * 
+     * @param newValue the new component margins
+     */
+    public void setOutsets(Insets newValue) {
+        set(PROPERTY_OUTSETS, newValue);
+    }
+
     /**
      * Sets the <code>TableModel</code> being visualized.
      * 
@@ -808,9 +840,26 @@ public class Table extends BorderedComponent {
         
         if (isAutoCreateColumnsFromModel()) {
             createDefaultColumnsFromModel();
-        }
-        
+        }        
         firePropertyChange(MODEL_CHANGED_PROPERTY, oldValue, newValue);
+    }
+    
+    /**
+     * Set the background color of the resize handles
+     * 
+     * @param newValue The background color of the resize handles
+     */
+    public void setResizeHandleBackground(Color newValue) {
+        set(PROPERTY_RESIZEHANDLE_BACKGROUND, newValue);
+    }
+
+    /**
+     * Set the fill image of the resize handles
+     * 
+     * @param newValue The fill image of the resize handles
+     */
+    public void setResizeHandleFillImage(FillImage newValue) {
+        set(PROPERTY_RESIZEHANDLE_FILLIMAGE, newValue);
     }
     
     /**
