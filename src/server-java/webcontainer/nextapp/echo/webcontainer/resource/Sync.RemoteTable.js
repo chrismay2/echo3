@@ -59,23 +59,8 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         _HEADER_ROW: -1,
 
         /**
-         * 
+         * The width of the (invisible) column resize handle
          */
-        _RESIZE_COLGROUP_PIXEL: 0,
-
-        /**
-         * 
-         */
-        _RESIZE_COLGROUP_PERCENT: 1,
-
-        /**
-         * Table width is null, the table automatically takes the spaces
-         * it needs (as calculated by the browser) 
-         * When the user resizes a column the table width changes accordingly, 
-         * the other columns remain unchanged
-         */
-        _RESIZE_TABLE_WIDTH: 2,
-
         _RESIZE_HANDLE_WIDTH: 6,
 
         /**
@@ -111,8 +96,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
      * @type Boolean
      */
     _useDefaultSelectionStyle: false,
-
-    _resizePolicy: 2, // _RESIZE_TABLE_WIDTH
 
     /** Constructor. */
     $construct: function() {
@@ -268,6 +251,10 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._headerVisible = this.component.render("headerVisible", true);
         this._zebraBackground = this.component.render("zebraBackground");
         this._verticalLine = this.component.render("verticalLine");
+        this._verticalOffset = 0;
+        if (this._verticalLine) {
+            this._verticalOffset = parseInt(this._verticalLine.split(' ')[0], 10);
+        }; 
         this._horizontalLine = this.component.render("horizontalLine");
         this._columnWeights = this.component.render("columnWeights");
         var insets = this.component.render("insets", 0);
@@ -276,6 +263,7 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         this._useDefaultSelectionStyle = this._selectionEnabled && !this.component.render("selectionForeground")
                 && !this.component.render("selectionBackground") && !this.component.render("selectionBackgroundImage")
                 && !this.component.render("selectionFont");
+
 
         if (this._selectionEnabled) {
             this.selectionModel = new Echo.Sync.RemoteTable.ListSelectionModel(parseInt(this.component.get("selectionMode"), 10));
@@ -300,11 +288,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
 
         if (this._width) {
             this._div.style.width = Echo.Sync.Extent.toCssValue(this._width, true, true);
-            if (Echo.Sync.Extent.isPercent(this._width)) {
-                this._resizePolicy = Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PERCENT;
-            } else {
-                this._resizePolicy = Echo.Sync.RemoteTableSync._RESIZE_COLGROUP_PIXEL;
-            }
         }
 
         var margins = this.component.render("margins");
@@ -437,13 +420,13 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
             headerHeight = this._tableHeader.clientHeight;
         }
         if (!this._height) {
-            // height is not set, so calculate it and adjust outer div
-            // accordingly
-            var actualTableHeight = this._table.clientHeight;
-            this._div.style.height = (headerHeight + actualTableHeight) + "px";
+            // height is not set, so calculate it and adjust outer div accordingly
+            this._div.style.height = (headerHeight + this._table.clientHeight) + "px";
         }
 
         var firstBodyRow = this._table.rows[0];
+        var scrollElement = this._headerVisible ? this._divBody : this._div;
+        var scrollOffset = scrollElement.scrollHeight > scrollElement.clientHeight ? 17 : 0;
         if (!this._width) {
             // calculate width if not set
             var totalWidth = 0;
@@ -451,26 +434,28 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 var w = firstBodyRow.cells[i].offsetWidth;
                 totalWidth += w;
             }
-            this._div.style.width = (totalWidth + 20) + "px";
+            this._div.style.width = (totalWidth + scrollOffset) + "px";
             this._table.style.width = "100%";
+            if (!this._headerVisibl && !this._height && scrollElement.scrollHeight === scrollElement.clientHeight && scrollOffset > 0) {
+                //fix when no header, width and height are set
+                this._div.style.width = totalWidth + "px";
+            }
         }
+        
 
         if (!this._headerVisible) {
             return;
         }
-
-        this._divHeader.style.height = headerHeight + "px";
 
         var separatorHeight = this._divHeader.style.borderBottomWidth;
         if (separatorHeight) {
             headerHeight += parseInt(separatorHeight);
         }
         this._divBody.style.top = headerHeight + "px";
-        var scrollVisible = this._divBody.scrollHeight > this._divBody.clientHeight;
-        this._divHeader.style.marginRight = scrollVisible ? "17px" : "0px";
+        this._divHeader.style.height = headerHeight + "px";
+        this._divHeader.style.marginRight = scrollOffset + "px";
 
-        // adjust header to body column widths if not already set
-        // in method _buildColGroup()
+        // adjust header to body column widths if not already set in method _buildColGroup()
         if (!this._explicitColWidths) {
             for (var i = 0; i < firstBodyRow.cells.length; i++) {
                 var borderWidth = (i === 0 ? 2 : 1) * this._verticalOffset;
@@ -534,8 +519,9 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
                 totalWidth += columnPixels + borderWidth;
             }
         }
-        if (!this._width && totalWidth > 0) {
+        if (totalWidth > 0) {
             this._explicitColWidths = true;
+            this._table.style.width = null;
             return null;
         }
         return colGroupElement;
@@ -597,7 +583,6 @@ Echo.Sync.RemoteTableSync = Core.extend(Echo.Render.ComponentSync, {
         var tdPrototype = document.createElement(isHeader ? "th" : "td");
         if (this._verticalLine) {
             tdPrototype.style.borderRight = this._verticalLine;
-            this._verticalOffset = parseInt(tdPrototype.style.borderRightWidth);
         }
         if (!isHeader && this._horizontalLine) {
             tdPrototype.style.borderBottom = this._horizontalLine;

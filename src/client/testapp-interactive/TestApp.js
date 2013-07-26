@@ -711,7 +711,8 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 	    cboColsAttr.items = [
 	    	{text: "Columns = null", id: null},
 	    	{text: "Columns = 20/40/40/20%", id: "percent"},
-	    	{text: "Columns = 80/80/240/80px", id: "pixel"}];
+	    	{text: "Columns = 80/80/140/50px", id: "pixel1"},
+	    	{text: "Columns = 80/80/300/80px", id: "pixel2"}];
 	    cboColsAttr.selectedId = "null";		
         cboColsAttr.events = {action: doAction};
         this.controlsColumn.add(this._cboCols = new Echo.SelectField(cboColsAttr));
@@ -753,8 +754,11 @@ TestApp.Tests.Table = Core.extend(TestApp.TestPane, {
 
 		var columnWidths = null;
 		switch (this._cboCols.get("selectedId")) {
-		case "pixel":
-			columnWidths =  ["80px", "80px", "240px", "80px"];
+		case "pixel1":
+			columnWidths =  ["80px", "80px", "140px", "50px"];
+			break;
+		case "pixel2":
+			columnWidths =  ["80px", "80px", "300px", "80px"];
 			break;
 		case "percent":
 			columnWidths =  ["20%", "40%", "40%", "20%"];
